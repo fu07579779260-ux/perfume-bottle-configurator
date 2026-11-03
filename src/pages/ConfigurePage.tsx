@@ -4,6 +4,7 @@ import { CapSection } from '@/components/panel/CapSection'
 import { ParamSlider } from '@/components/panel/controls'
 import { ExportSection } from '@/components/panel/ExportSection'
 import { FitTestSection } from '@/components/panel/FitTestSection'
+import { PrintSection } from '@/components/panel/PrintSection'
 import { SilhouettePicker } from '@/components/panel/SilhouettePicker'
 import { TextureSection } from '@/components/panel/TextureSection'
 import { ViewportErrorBoundary } from '@/components/viewport/ViewportErrorBoundary'
@@ -129,6 +130,8 @@ function BottlePanel() {
           ))}
         </div>
       </div>
+
+      <PrintSection />
 
       <FitTestSection />
 

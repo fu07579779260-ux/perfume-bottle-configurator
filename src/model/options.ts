@@ -143,6 +143,19 @@ export const PRINTERS: Record<Technology, readonly string[]> = {
   sls: ['generic'],
 }
 
+/** Build volume of each printer preset, in mm (X × Y × Z). */
+export const PRINTER_BEDS: Record<string, [number, number, number]> = {
+  'fdm:generic': [220, 220, 250],
+  'fdm:bambu-x1': [256, 256, 256],
+  'fdm:bambu-p1s': [256, 256, 256],
+  'fdm:bambu-a1': [256, 256, 256],
+  'fdm:prusa-mk4': [250, 210, 220],
+  'resin:generic': [190, 120, 200],
+  'resin:elegoo': [218, 123, 250],
+  'resin:anycubic': [218, 123, 260],
+  'sls:generic': [300, 300, 300],
+}
+
 /** Values applied when the technology changes (PLAN.md §5); the user can override them afterwards. */
 export const TECHNOLOGY_DEFAULTS: Record<
   Technology,
