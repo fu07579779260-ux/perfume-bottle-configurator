@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { ParamSlider } from '@/components/panel/controls'
+import { ExportSection } from '@/components/panel/ExportSection'
 import { ViewportErrorBoundary } from '@/components/viewport/ViewportErrorBoundary'
 import { useT } from '@/i18n/language'
 import { cn } from '@/lib/utils'
@@ -84,6 +85,8 @@ function BottlePanel() {
           ))}
         </div>
       </div>
+
+      <ExportSection />
 
       <p className="rounded-lg bg-foam/50 p-3 text-xs text-tide">{t('panel.pending')}</p>
     </div>
