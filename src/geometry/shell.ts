@@ -269,6 +269,12 @@ function curveRadius(l: ShellLayout, t: number): number {
     const u = (t - belly) / (1 - belly)
     return l.topRadius + (l.shoulderRadius - l.topRadius) * (1 - smoothstep(u))
   }
+  if (l.silhouette === 'exoskeleton') {
+    // A barrel: swells from the base ring to the widest point and back to the same width at the top ring
+    const widest = clamp(sh * 0.65, 0.35, 0.65)
+    const u = t < widest ? t / widest : (1 - t) / (1 - widest)
+    return l.baseRadius + (l.shoulderRadius - l.baseRadius) * Math.sin((u * Math.PI) / 2)
+  }
   // Pebble: a soft swell up to the widest point, then a domed top
   const widest = clamp(sh * 0.7, 0.3, 0.65)
   if (t < widest) return l.baseRadius + (l.shoulderRadius - l.baseRadius) * Math.sin(((t / widest) * Math.PI) / 2)
@@ -278,7 +284,7 @@ function curveRadius(l: ShellLayout, t: number): number {
 
 /** Outer corners from the base edge up to the rim edge. */
 function outerCorners(l: ShellLayout): Corner[] {
-  if (l.silhouette === 'teardrop' || l.silhouette === 'pebble') {
+  if (l.silhouette === 'teardrop' || l.silhouette === 'pebble' || l.silhouette === 'exoskeleton') {
     const out: Corner[] = []
     for (let i = 0; i <= CURVE_SAMPLES; i++) {
       const t = i / CURVE_SAMPLES
@@ -467,7 +473,8 @@ export function shellPlacement(config: DesignConfig) {
 /** Outer radius of the shell where it meets the cap (before the rim rounding). */
 export function shellTopRadius(l: ShellLayout): number {
   const curved = l.silhouette === 'teardrop' || l.silhouette === 'pebble'
-  return Math.max(curved ? l.topRadius : l.shoulderRadius, firmRadius(l, l.topY))
+  const top = curved ? l.topRadius : l.silhouette === 'exoskeleton' ? l.baseRadius : l.shoulderRadius
+  return Math.max(top, firmRadius(l, l.topY))
 }
 
 /** Sweep the profile around Y into a closed, watertight solid with outward-facing triangles. */

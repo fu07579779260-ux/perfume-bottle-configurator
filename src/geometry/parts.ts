@@ -3,7 +3,7 @@ import type { DesignConfig } from '@/model/config'
 import { fromManifold, toManifold } from './manifold-mesh'
 import { mergeMeshes, meshBounds, translate, type MeshData } from './mesh'
 import { buildCapMesh, capProfile } from './cap'
-import { openingCutter } from './openings'
+import { frameLayout, openingCutter } from './openings'
 import { buildBaseCapMesh, buildShellMesh, shellLayout, shellProfile, shellTopRadius } from './shell'
 
 // The printable parts of a shell, in place around the bottle (for the preview
@@ -94,13 +94,18 @@ function jointPlan(config: DesignConfig) {
   const lo = 3
   const hi = Math.min(l.topY, config.bottle.bodyHeight) - 3
 
+  // On a frame the joints must land in the solid bands, not in the open panels
+  const frame = frameLayout(config, l)
+  const targets = frame ? (frame.bands.length ? frame.bands : [(frame.from + frame.to) / 2]).map((y) => (y - lo) / (hi - lo)) : [0.25, 0.72]
   for (const size of sizes) {
     const need = size + 2 * HOLE_WALL
+    // A frame band must also be tall enough for the hole
+    if (frame && frame.strut < need) continue
     const ys: number[] = []
-    for (const target of [0.25, 0.72]) {
+    for (const target of targets) {
       const y0 = lo + (hi - lo) * target
-      // Nearest height around the target where the wall is thick enough
-      for (let d = 0; d <= hi - lo; d += 1) {
+      // Nearest height around the target where the wall is thick enough (exactly on a frame band)
+      for (let d = 0; d <= (frame ? 0 : hi - lo); d += 1) {
         const y = [y0 - d, y0 + d].find((v) => v >= lo && v <= hi && wallAt(config, v).outer - wallAt(config, v).inner >= need)
         if (y !== undefined) {
           if (!ys.some((v) => Math.abs(v - y) < size + 4)) ys.push(y)

@@ -4,8 +4,9 @@ import { TECHNOLOGY_DEFAULTS } from '@/model/options'
 import { shellLayout, type ShellLayout } from './shell'
 
 // Openings through the shell wall (PLAN.md §4.4): cellular openwork (a
-// Voronoi pattern of holes that lets the glass show through) and viewing
-// windows for the perfume level. Both are worked out flat, on the shell's
+// Voronoi pattern of holes that lets the glass show through), viewing
+// windows for the perfume level, and the panels between the struts of the
+// Exoskeleton Frame. Both are worked out flat, on the shell's
 // surface unrolled around its circumference (u = arc length, y = height),
 // and every hole becomes a convex cutter that reaches through the wall.
 
@@ -120,6 +121,68 @@ function cellularHoles(config: DesignConfig, l: ShellLayout, minHole: number): {
   return { holes, skipped }
 }
 
+/** A rounded rectangle centred on (u, y), as a convex outline. */
+function roundedRect(u: number, y: number, w: number, h: number): Hole {
+  const r = Math.min(w, h) * 0.35
+  const out: Hole = []
+  const corners: [number, number, number][] = [
+    [u + w / 2 - r, y - h / 2 + r, -Math.PI / 2],
+    [u + w / 2 - r, y + h / 2 - r, 0],
+    [u - w / 2 + r, y + h / 2 - r, Math.PI / 2],
+    [u - w / 2 + r, y - h / 2 + r, Math.PI],
+  ]
+  for (const [cu, cy, start] of corners) {
+    for (let k = 0; k <= 6; k++) {
+      const a = start + (k / 6) * (Math.PI / 2)
+      out.push([cu + r * Math.cos(a), cy + r * Math.sin(a)])
+    }
+  }
+  return out
+}
+
+export interface FrameLayout {
+  struts: number
+  /** Width of each strut and band (at least the technology's minimum strut) */
+  strut: number
+  /** Heights of the horizontal bands around the middle */
+  bands: number[]
+  /** Bottom and top of the open part (above the base ring, below the top ring) */
+  from: number
+  to: number
+}
+
+/** Struts and bands of the Exoskeleton Frame, or null for the other silhouettes. */
+export function frameLayout(config: DesignConfig, l = shellLayout(config)): FrameLayout | null {
+  if (config.shape.silhouette !== 'exoskeleton') return null
+  const strut = Math.max(config.shape.strutWidth, TECHNOLOGY_DEFAULTS[config.manufacturing.technology].minStrut)
+  const ring = Math.max(strut, 4)
+  const from = l.texture.from + ring
+  const to = l.texture.to - ring
+  const h = to - from
+  const count = h > 70 ? 2 : h > 35 ? 1 : 0
+  const bands = Array.from({ length: count }, (_, k) => from + (h * (k + 1)) / (count + 1))
+  return { struts: config.shape.strutCount, strut, bands, from, to }
+}
+
+/** Panels between the struts and bands; a strut sits at the front and every 360°/n after it. */
+function frameHoles(config: DesignConfig, l: ShellLayout, minHole: number): Hole[] {
+  const f = frameLayout(config, l)
+  if (!f || f.to - f.from < 4) return []
+  const circumference = Math.PI * 2 * l.texture.radius
+  const pitch = circumference / f.struts
+  const w = pitch - f.strut
+  const edges = [f.from, ...f.bands, f.to]
+  const holes: Hole[] = []
+  for (let row = 0; row < edges.length - 1; row++) {
+    const lo = edges[row] + (row > 0 ? f.strut / 2 : 0)
+    const hi = edges[row + 1] - (row < edges.length - 2 ? f.strut / 2 : 0)
+    if (w < minHole || hi - lo < minHole) continue
+    const front = (Math.PI / 2) * l.texture.radius
+    for (let k = 0; k < f.struts; k++) holes.push(roundedRect(front + (k + 0.5) * pitch, (lo + hi) / 2, w, hi - lo))
+  }
+  return holes
+}
+
 /** Viewing windows, evenly around the shell, the first one facing the front (+Z). */
 function windowHoles(config: DesignConfig, l: ShellLayout): Hole[] {
   const t = config.texture
@@ -171,6 +234,10 @@ export function shellOpenings(config: DesignConfig): Openings {
   const t = config.texture
   const cellular = t.type === 'cellular' || (t.zone === 'bands' && t.upperType === 'cellular')
   const cells = cellular ? cellularHoles(config, l, minHole) : { holes: [], skipped: 0 }
+  // The frame is all openings already, so it gets no extra windows
+  if (config.shape.silhouette === 'exoskeleton') {
+    return { radius: l.texture.radius, cells: frameHoles(config, l, minHole), windows: [], skipped: 0 }
+  }
   return { radius: l.texture.radius, cells: cells.holes, windows: windowHoles(config, l), skipped: cells.skipped }
 }
 

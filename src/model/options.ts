@@ -72,7 +72,7 @@ export const SILHOUETTE_STARTS: Record<Silhouette, { sectionRatio?: number; base
   teardrop: { baseExtra: 10, shoulderExtra: 22 },
   prism: {},
   pebble: { baseExtra: 8, shoulderExtra: 26, sectionRatio: 0.65 },
-  exoskeleton: {},
+  exoskeleton: { baseExtra: 10, shoulderExtra: 16 },
   coral: {},
 }
 

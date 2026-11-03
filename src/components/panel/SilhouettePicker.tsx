@@ -4,8 +4,8 @@ import { cn } from '@/lib/utils'
 import { useDesign } from '@/model/design-context'
 import { SILHOUETTES, type Silhouette } from '@/model/options'
 
-/** Exoskeleton Frame and Coral arrive in build steps 14 and 15. */
-const READY: readonly Silhouette[] = ['column', 'teardrop', 'prism', 'pebble']
+/** Coral arrives in build step 15. */
+const READY: readonly Silhouette[] = ['column', 'teardrop', 'prism', 'pebble', 'exoskeleton']
 
 export function SilhouettePicker() {
   const t = useT()

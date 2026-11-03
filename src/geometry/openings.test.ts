@@ -3,8 +3,8 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { DEFAULT_CONFIG, type DesignConfig } from '@/model/config'
 import { designReducer } from '@/model/reducer'
 import { toManifold } from './manifold-mesh'
-import { hasOpenings, shellOpenings } from './openings'
-import { cutShell, printParts } from './parts'
+import { frameLayout, hasOpenings, shellOpenings } from './openings'
+import { cutShell, jointInfo, printParts } from './parts'
 import { buildShellMesh, shellLayout } from './shell'
 
 let wasm: ManifoldToplevel
@@ -96,5 +96,45 @@ describe('windows', () => {
 
   it('has no openings by default', () => {
     expect(hasOpenings(design())).toBe(false)
+  })
+})
+
+describe('exoskeleton frame', () => {
+  const c = design({ shape: { silhouette: 'exoskeleton', strutCount: 6, strutWidth: 4 } })
+
+  it('opens a panel between every pair of struts, in every row between the bands', () => {
+    const f = frameLayout(c)!
+    expect(f.bands.length).toBeGreaterThanOrEqual(1)
+    expect(shellOpenings(c).cells).toHaveLength(6 * (f.bands.length + 1))
+    expect(shellOpenings(c).windows).toHaveLength(0)
+  })
+
+  it('cuts through and stays one printable solid', () => {
+    const cut = solid(cutShell(wasm, c, 64)!)
+    expect(cut.status).toBe('NoError')
+    expect(cut.genus).toBeGreaterThanOrEqual(solid(buildShellMesh(c, 64)).genus + 6)
+  })
+
+  it('never makes struts thinner than the technology allows', () => {
+    const thin = design({ shape: { silhouette: 'exoskeleton', strutWidth: 1.2 } })
+    expect(frameLayout(thin)!.strut).toBe(2)
+    const resin = design({ shape: { silhouette: 'exoskeleton', strutWidth: 1.2 }, manufacturing: { technology: 'resin' } })
+    expect(frameLayout(resin)!.strut).toBe(1.2)
+  })
+
+  it('splits into halves with the dowels in the solid bands', () => {
+    expect(c.assembly.method).toBe('halves')
+    const info = jointInfo(c)
+    expect(info.fits).toBe(true)
+    const parts = printParts(wasm, c, 48)
+    for (const id of ['front', 'back'] as const) {
+      expect(solid(parts.find((p) => p.id === id)!.mesh).status).toBe('NoError')
+    }
+    expect(parts.filter((p) => p.id === 'dowel')).toHaveLength(info.count)
+  })
+
+  it('swells like a barrel, wider in the middle than at the rings', () => {
+    const l = shellLayout(c)
+    expect(l.shoulderRadius).toBeGreaterThan(l.baseRadius)
   })
 })

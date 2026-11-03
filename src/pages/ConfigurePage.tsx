@@ -19,7 +19,17 @@ const Viewport = lazy(() => import('@/components/viewport/Viewport'))
 /** Perfume colours for the preview liquid */
 const LIQUIDS = ['#f2c46d', '#f4dfe6', '#cfe8f2', '#d9ecc8', '#e9a07a']
 
-type ShapeSlider = 'heightExtra' | 'shoulderHeight' | 'shoulderExtra' | 'baseExtra' | 'cornerRadius' | 'sectionRatio' | 'prismSides' | 'prismTwist'
+type ShapeSlider =
+  | 'heightExtra'
+  | 'shoulderHeight'
+  | 'shoulderExtra'
+  | 'baseExtra'
+  | 'cornerRadius'
+  | 'sectionRatio'
+  | 'prismSides'
+  | 'prismTwist'
+  | 'strutCount'
+  | 'strutWidth'
 
 const COMMON: ShapeSlider[] = ['heightExtra', 'shoulderHeight', 'shoulderExtra', 'baseExtra', 'cornerRadius']
 /** Extra sliders that only mean something for one silhouette */
@@ -27,6 +37,7 @@ const SPECIFIC: Partial<Record<string, ShapeSlider[]>> = {
   column: ['sectionRatio'],
   pebble: ['sectionRatio'],
   prism: ['prismSides', 'prismTwist'],
+  exoskeleton: ['strutCount', 'strutWidth'],
 }
 
 // Temporary panel until the step panel arrives: bottle, silhouette, proportions, fit and liquid colour
