@@ -2,6 +2,7 @@ import type { DesignConfig } from '@/model/config'
 import { TECHNOLOGY_DEFAULTS, type AssemblyMethod, type Silhouette } from '@/model/options'
 import { maxWrapTop, shoulderStart, wrapCavityRadius } from './envelope'
 import { meshBounds, revolve, type MeshData } from './mesh'
+import { textureOffset, textureSegments, textureStep, type TextureSpan } from './texture'
 
 // The printed shell as a closed side profile swept around the Y axis.
 // Y = 0 is the base of the glass bottle. How the bottle gets in decides the
@@ -92,6 +93,8 @@ export interface ShellLayout {
   spigot: Spigot
   /** Outer radius of the seat the cap rests on: as wide as the cap's base needs */
   seat: number
+  /** Band of the outer skin that carries the surface texture */
+  texture: TextureSpan
 }
 
 /** Small rounding where the rim meets the opening, so the edge isn't sharp. */
@@ -112,7 +115,7 @@ const SPIGOT_WALL = 2
 /** Extra on the seat beyond the cap's own wall, so the cap never overhangs the shell */
 const SEAT_MARGIN = 0.2
 /** Height of the full-width seat below the top; below it the seat blends in at 45° */
-const SEAT_HEIGHT = 3
+export const SEAT_HEIGHT = 3
 const CAP_SNAP_DEPTH = 0.5
 
 const SQUASHED: readonly Silhouette[] = ['column', 'pebble']
@@ -201,6 +204,13 @@ export function shellLayout(config: DesignConfig): ShellLayout {
     ribs: method === 'top' ? assembly.frictionRibs : 0,
     spigot,
     seat,
+    texture: {
+      // Clear of the base rounding, and of the seat and its 45° blend
+      from: bottomY + corner + 1.5,
+      to: topY - SEAT_HEIGHT - Math.max(0, seat - Math.min(shoulderRadius, baseRadius)) - 2,
+      split: bottomY + (height * config.texture.zoneSplit) / 100,
+      radius: (baseRadius + shoulderRadius) / 2,
+    },
   }
 }
 
@@ -302,13 +312,13 @@ function threadZone(f: BaseFit): Corner[] {
 }
 
 /** Add points to long outer pieces, then keep every outer point outside the firm radius. */
-function settleOuter(l: ShellLayout, points: ShellPoint[]): ShellPoint[] {
+function settleOuter(l: ShellLayout, points: ShellPoint[], maxStep: number): ShellPoint[] {
   const out: ShellPoint[] = []
   points.forEach((p, i) => {
     const prev = points[i - 1]
     // The bottom face (starting on the axis) isn't skin, so it gets no extra points
     if (prev && p.side === 'outer' && prev.side === 'outer' && prev.r > 0) {
-      const n = Math.ceil(Math.hypot(p.r - prev.r, p.y - prev.y) / MAX_STEP)
+      const n = Math.ceil(Math.hypot(p.r - prev.r, p.y - prev.y) / maxStep)
       for (let k = 1; k < n; k++) {
         const t = k / n
         out.push({ r: prev.r + (p.r - prev.r) * t, y: prev.y + (p.y - prev.y) * t, side: 'outer' })
@@ -371,7 +381,7 @@ export function shellProfile(config: DesignConfig): ShellPoint[] {
       ...threadZone(f),
     ]
   }
-  return settleOuter(l, roundCorners(corners))
+  return settleOuter(l, roundCorners(corners), Math.min(MAX_STEP, textureStep(config, l.texture)))
 }
 
 /** 0 … 1 … 0 trapezoid along one pitch: the thread's tooth shape. */
@@ -443,8 +453,11 @@ export function shellPlacement(config: DesignConfig) {
       const rel = ((((a - turn) % sector) + sector) % sector) - sector / 2
       const k = clamp((r - cavityEdge(l, p.y)) / l.minWall, 0, 1)
       r *= 1 + k * (1 / Math.cos(rel) - 1)
+      r = Math.max(firmRadius(l, p.y), r + textureOffset(config, l.texture, p.y, a, r))
       return [Math.cos(a) * r, Math.sin(a) * r]
     } else if (p.side === 'outer') {
+      // Texture first (never below the firm wall), then the depth squash
+      r = Math.max(firmRadius(l, p.y), r + textureOffset(config, l.texture, p.y, a, r))
       return [Math.cos(a) * r, Math.sin(a) * depthRadius(l, r, p.y)]
     }
     return [Math.cos(a) * r, Math.sin(a) * r]
@@ -462,7 +475,7 @@ export function buildShellMesh(config: DesignConfig, segments = 96): MeshData {
   const l = shellLayout(config)
   // Turning each ring with the twist keeps the polygon corners on vertices
   const angleAt = (p: ShellPoint) => (p.side === 'outer' ? l.twist * ((p.y - l.bottomY) / l.height) : 0)
-  return revolve(shellProfile(config), roundSegments(l, segments), shellPlacement(config), angleAt)
+  return revolve(shellProfile(config), roundSegments(l, textureSegments(config, segments)), shellPlacement(config), angleAt)
 }
 
 /** The plug that closes a bottom-loaded shell, with the matching thread or snap bead. */
