@@ -1,33 +1,65 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+/* Bundled with the app (no font CDN), so it also loads in mainland China */
+@import "@fontsource-variable/fraunces/soft.css";
 
-/* Base shadcn/ui tokens (light). The ocean / organic theme replaces these in build step 2. */
+/*
+ * Ocean / organic theme: warm sand, deep lagoon ink, sea-foam and one coral
+ * accent; soft radii and flowing curves. Deliberately different from the
+ * keycap configurator (paper + ink technical drawing) and the vase
+ * configurator (dark, soft). Chinese text uses the system fonts.
+ */
 :root {
-  --radius: 0.375rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --radius: 1rem;
+
+  --sand: #f5efe4;
+  --shell: #fbf8f2; /* cards, raised surfaces */
+  --deep: #123a40; /* main text, 11:1 on sand */
+  --tide: #4b6a6c; /* secondary text, 5.4:1 on sand */
+  --lagoon: #2b7a74; /* primary actions */
+  --foam: #d5e8e2; /* soft fills, selected states */
+  --coral: #d9694c; /* the single warm accent */
+  --rule: #e3d9c8; /* hairlines */
+
+  --background: var(--sand);
+  --foreground: var(--deep);
+  --card: var(--shell);
+  --card-foreground: var(--deep);
+  --popover: var(--shell);
+  --popover-foreground: var(--deep);
+  --primary: var(--lagoon);
+  --primary-foreground: #ffffff;
+  --secondary: var(--foam);
+  --secondary-foreground: var(--deep);
+  --muted: #ece4d6;
+  --muted-foreground: var(--tide);
+  --accent: var(--foam);
+  --accent-foreground: var(--deep);
+  --destructive: #b42318;
+  --border: var(--rule);
+  --input: #cfc3ae;
+  --ring: var(--lagoon);
 }
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 2px);
-  --radius-md: var(--radius);
-  --radius-lg: calc(var(--radius) + 2px);
+  --font-sans: ui-sans-serif, system-ui, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  --font-display: "Fraunces Variable", "Songti SC", "Noto Serif SC", Georgia, serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+
+  --radius-sm: calc(var(--radius) - 0.5rem);
+  --radius-md: calc(var(--radius) - 0.25rem);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 0.5rem);
+
+  --color-sand: var(--sand);
+  --color-shell: var(--shell);
+  --color-deep: var(--deep);
+  --color-tide: var(--tide);
+  --color-lagoon: var(--lagoon);
+  --color-foam: var(--foam);
+  --color-coral: var(--coral);
+  --color-rule: var(--rule);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -53,6 +85,48 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background font-sans text-foreground antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-variation-settings: "SOFT" 100;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Small label above headings and sections */
+  .kicker {
+    @apply font-sans text-xs font-medium tracking-[0.18em] text-tide uppercase;
+  }
+  :lang(zh-CN) .kicker {
+    @apply tracking-[0.08em];
+  }
+
+  /* Soft light pooling in the water, behind every page */
+  .tidewater {
+    background:
+      radial-gradient(60rem 30rem at 85% -10%, color-mix(in oklab, var(--foam) 90%, transparent), transparent 70%),
+      radial-gradient(40rem 24rem at -10% 30%, color-mix(in oklab, var(--foam) 55%, transparent), transparent 70%),
+      var(--sand);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .drift {
+    animation: drift 14s ease-in-out infinite alternate;
+  }
+  @keyframes drift {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-3%);
+    }
   }
 }

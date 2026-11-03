@@ -1,6 +1,8 @@
 import type { ComponentType } from 'react'
-import { cn } from '@/lib/utils'
-import { href, useRoute, type Route } from '@/lib/router'
+import { AppFooter } from '@/components/layout/AppFooter'
+import { AppHeader } from '@/components/layout/AppHeader'
+import { useT } from '@/i18n/language'
+import { useRoute, type Route } from '@/lib/router'
 import {
   ConfigurePage,
   GuidePage,
@@ -9,40 +11,37 @@ import {
   MyDesignsPage,
 } from '@/pages/pages'
 
-const PAGES: Record<Route, { label: string; Page: ComponentType }> = {
-  '/': { label: 'Home', Page: HomePage },
-  '/configure': { label: 'Configure', Page: ConfigurePage },
-  '/inspiration': { label: 'Inspiration', Page: InspirationPage },
-  '/guide': { label: 'Guide', Page: GuidePage },
-  '/my-designs': { label: 'My designs', Page: MyDesignsPage },
+const PAGES: Record<Route, ComponentType> = {
+  '/': HomePage,
+  '/configure': ConfigurePage,
+  '/inspiration': InspirationPage,
+  '/guide': GuidePage,
+  '/my-designs': MyDesignsPage,
 }
 
 export default function App() {
   const route = useRoute()
-  const { Page } = PAGES[route]
+  const t = useT()
+  const Page = PAGES[route]
 
   return (
-    <div className="min-h-dvh">
-      <header className="border-b">
-        <nav aria-label="Main" className="mx-auto flex max-w-5xl flex-wrap gap-1 px-4 py-2">
-          {(Object.keys(PAGES) as Route[]).map((r) => (
-            <a
-              key={r}
-              href={href(r)}
-              aria-current={r === route ? 'page' : undefined}
-              className={cn(
-                'rounded-md px-3 py-1.5 text-sm hover:bg-accent',
-                r === route && 'bg-secondary font-medium',
-              )}
-            >
-              {PAGES[r].label}
-            </a>
-          ))}
-        </nav>
-      </header>
-      <main>
+    <div className="tidewater flex min-h-dvh flex-col">
+      <a
+        href="#main"
+        onClick={(e) => {
+          // Plain #main would be read as a route by the hash router
+          e.preventDefault()
+          document.getElementById('main')?.focus()
+        }}
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-full focus:bg-deep focus:px-4 focus:py-2 focus:text-sand"
+      >
+        {t('app.skip')}
+      </a>
+      <AppHeader route={route} />
+      <main id="main" tabIndex={-1} className="flex-1 outline-none">
         <Page />
       </main>
+      <AppFooter />
     </div>
   )
 }
