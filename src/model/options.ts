@@ -63,6 +63,19 @@ export const RECOMMENDED_ASSEMBLY: Record<Silhouette, AssemblyMethod> = {
   coral: 'bottom',
 }
 
+/**
+ * Starting proportions applied when the silhouette changes, so each one looks
+ * like itself straight away; the user can change them afterwards.
+ */
+export const SILHOUETTE_STARTS: Record<Silhouette, { sectionRatio?: number; baseExtra?: number; shoulderExtra?: number }> = {
+  column: { sectionRatio: 1 },
+  teardrop: { baseExtra: 10, shoulderExtra: 22 },
+  prism: {},
+  pebble: { baseExtra: 8, shoulderExtra: 26, sectionRatio: 0.65 },
+  exoskeleton: {},
+  coral: {},
+}
+
 // ---------- Texture ----------
 
 export const TEXTURES = ['smooth', 'fluted', 'facets', 'waves', 'cellular'] as const

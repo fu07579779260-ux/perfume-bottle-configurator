@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { ParamSlider } from '@/components/panel/controls'
 import { ExportSection } from '@/components/panel/ExportSection'
 import { FitTestSection } from '@/components/panel/FitTestSection'
+import { SilhouettePicker } from '@/components/panel/SilhouettePicker'
 import { ViewportErrorBoundary } from '@/components/viewport/ViewportErrorBoundary'
 import { useT } from '@/i18n/language'
 import { cn } from '@/lib/utils'
@@ -15,9 +16,17 @@ const Viewport = lazy(() => import('@/components/viewport/Viewport'))
 /** Perfume colours for the preview liquid */
 const LIQUIDS = ['#f2c46d', '#f4dfe6', '#cfe8f2', '#d9ecc8', '#e9a07a']
 
-const PROPORTIONS = ['heightExtra', 'shoulderHeight', 'shoulderExtra', 'baseExtra', 'cornerRadius', 'sectionRatio'] as const
+type ShapeSlider = 'heightExtra' | 'shoulderHeight' | 'shoulderExtra' | 'baseExtra' | 'cornerRadius' | 'sectionRatio' | 'prismSides' | 'prismTwist'
 
-// Temporary panel until the step panel arrives: bottle size, Column proportions, fit and liquid colour
+const COMMON: ShapeSlider[] = ['heightExtra', 'shoulderHeight', 'shoulderExtra', 'baseExtra', 'cornerRadius']
+/** Extra sliders that only mean something for one silhouette */
+const SPECIFIC: Partial<Record<string, ShapeSlider[]>> = {
+  column: ['sectionRatio'],
+  pebble: ['sectionRatio'],
+  prism: ['prismSides', 'prismTwist'],
+}
+
+// Temporary panel until the step panel arrives: bottle, silhouette, proportions, fit and liquid colour
 function BottlePanel() {
   const t = useT()
   const { config, patch } = useDesign()
@@ -44,9 +53,11 @@ function BottlePanel() {
         </div>
       </div>
 
+      <SilhouettePicker />
+
       <div className="space-y-3">
         <h2 className="kicker">{t('panel.proportions')}</h2>
-        {PROPORTIONS.map((key) => (
+        {[...COMMON, ...(SPECIFIC[config.shape.silhouette] ?? [])].map((key) => (
           <ParamSlider
             key={key}
             label={t(`param.${key}`)}

@@ -1,5 +1,5 @@
 import { DEFAULT_CONFIG, type DesignConfig, type Section } from './config'
-import { BOTTLE_DIMENSIONS, RECOMMENDED_ASSEMBLY, TECHNOLOGY_DEFAULTS } from './options'
+import { BOTTLE_DIMENSIONS, RECOMMENDED_ASSEMBLY, SILHOUETTE_STARTS, TECHNOLOGY_DEFAULTS } from './options'
 import { sanitizeConfig } from './sanitize'
 
 export type DesignAction =
@@ -29,9 +29,11 @@ export function designReducer(state: DesignConfig, action: DesignAction): Design
       }
 
       // A new silhouette brings its recommended assembly method (PLAN.md §4.2)
+      // and its starting proportions
       const silhouette = next.shape.silhouette
       if (silhouette !== state.shape.silhouette) {
         next.assembly = { ...next.assembly, method: RECOMMENDED_ASSEMBLY[silhouette] }
+        next.shape = { ...next.shape, ...SILHOUETTE_STARTS[silhouette] }
       }
 
       // A new technology brings its own clearances, material and printer (PLAN.md §5)

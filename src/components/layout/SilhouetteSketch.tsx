@@ -29,11 +29,11 @@ const SHELLS: Record<Silhouette, ReactNode> = {
   ),
 }
 
-export function SilhouetteSketch({ silhouette }: { silhouette: Silhouette }) {
+export function SilhouetteSketch({ silhouette, className = 'mx-auto h-28 w-auto' }: { silhouette: Silhouette; className?: string }) {
   const open = silhouette === 'exoskeleton'
 
   return (
-    <svg viewBox="0 0 64 100" aria-hidden="true" className="mx-auto h-28 w-auto">
+    <svg viewBox="0 0 64 100" aria-hidden="true" className={className}>
       {/* Glass bottle and its pump */}
       <rect x="22" y="34" width="20" height="56" rx="5" fill="var(--foam)" stroke="var(--tide)" strokeDasharray="2 2" />
       <rect x="28.5" y="24" width="7" height="10" rx="1.5" fill="none" stroke="var(--tide)" />

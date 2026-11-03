@@ -2,7 +2,7 @@ import { ContactShadows, Environment, Lightformer, OrbitControls } from '@react-
 import { Canvas, useThree } from '@react-three/fiber'
 import { useLayoutEffect, useMemo, useState } from 'react'
 import { bottleTotalHeight } from '@/geometry/bottle'
-import { buildShellMesh, checkWall, shellLayout, shellSize } from '@/geometry/shell'
+import { buildShellMesh, checkOverhang, checkWall, shellLayout, shellSize } from '@/geometry/shell'
 import { fill, useT } from '@/i18n/language'
 import { cn } from '@/lib/utils'
 import { useDesign } from '@/model/design-context'
@@ -63,8 +63,9 @@ export default function Viewport() {
 
   const shell = useMemo(() => buildShellMesh(config), [config])
   const { bottomY } = shellLayout(config)
-  const size = shellSize(config)
+  const size = shellSize(config, shell)
   const wall = checkWall(config)
+  const overhang = checkOverhang(config)
 
   // Frame the glass bottle with its pump; the shell's own edits don't move the camera
   const height = bottleTotalHeight(bottle)
@@ -138,6 +139,14 @@ export default function Viewport() {
               : fill(t('viewport.wallThin'), { min: mm(wall.required) })}
           </dd>
         </div>
+        {!overhang.ok && overhang.limit !== null && (
+          <div className="flex flex-wrap gap-x-2">
+            <dt className="text-tide">{t('viewport.overhang')}</dt>
+            <dd className="font-semibold text-coral-ink">
+              {fill(t('viewport.overhangSteep'), { angle: String(overhang.maxAngle), limit: String(overhang.limit) })}
+            </dd>
+          </div>
+        )}
       </dl>
       <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4">
         <p className="text-xs text-tide">{t('viewport.hint')}</p>

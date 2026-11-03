@@ -19,10 +19,16 @@ export interface RevolvePoint {
  *   vertices that close the bottom and the inside floor (a cup).
  * - Otherwise the profile is a loop and the result is a ring (a tube).
  *
- * `depthAt` maps a radius to its depth (Z) radius, e.g. to squash the outer
- * wall into an ellipse; by default the section is round.
+ * `place` turns a profile point and an angle into (x, z), e.g. to squash the
+ * outer wall into an ellipse or a polygon; by default the section is round.
+ * `angleAt` turns each ring by an angle (radians), e.g. for a twist.
  */
-export function revolve(profile: RevolvePoint[], segments: number, depthAt: (r: number) => number = (r) => r): MeshData {
+export function revolve<P extends RevolvePoint>(
+  profile: P[],
+  segments: number,
+  place: (p: P, angle: number) => [x: number, z: number] = (p, a) => [Math.cos(a) * p.r, Math.sin(a) * p.r],
+  angleAt: (p: P) => number = () => 0,
+): MeshData {
   const first = profile[0]
   const last = profile[profile.length - 1]
   const capped = first.r === 0 && last.r === 0
@@ -33,10 +39,10 @@ export function revolve(profile: RevolvePoint[], segments: number, depthAt: (r: 
 
   if (capped) positions.push(0, first.y, 0)
   for (const p of rings) {
-    const d = depthAt(p.r)
+    const turn = angleAt(p)
     for (let s = 0; s < segments; s++) {
-      const a = (s / segments) * Math.PI * 2
-      positions.push(Math.cos(a) * p.r, p.y, Math.sin(a) * d)
+      const [x, z] = place(p, turn + (s / segments) * Math.PI * 2)
+      positions.push(x, p.y, z)
     }
   }
   const end = positions.length / 3
