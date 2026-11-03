@@ -76,16 +76,17 @@ function offsetOf(config: DesignConfig, type: Texture, span: TextureSpan, y: num
 export function textureOffset(config: DesignConfig, span: TextureSpan, y: number, a: number, r: number): number {
   if (y <= span.from || y >= span.to) return 0
   const fade = smoothstep((y - span.from) / FADE) * smoothstep((span.to - y) / FADE)
-  // The coral carries its own grooves instead of a texture
-  if (config.shape.silhouette === 'coral') return fade * coralGroove(config, span, y, a)
+  // The coral carries its own grooves; only the advanced mode adds a texture over them
+  const coral = config.shape.silhouette === 'coral' ? coralGroove(config, span, y, a) : 0
+  if (coral && !config.mode.advanced) return fade * coral
   const { type, zone, upperType } = config.texture
-  if (zone === 'whole') return fade * offsetOf(config, type, span, y, a, r)
+  if (zone === 'whole') return fade * (coral + offsetOf(config, type, span, y, a, r))
   // Lower part only, or two bands that cross-fade over 2 mm at the split
   const upper = zone === 'bands' ? upperType : 'smooth'
   const mix = smoothstep((y - span.split + 1) / 2)
   const lower = offsetOf(config, type, span, y, a, r)
   const top = upper === 'smooth' ? 0 : offsetOf(config, upper, span, y, a, r)
-  return fade * (lower * (1 - mix) + top * mix)
+  return fade * (coral + lower * (1 - mix) + top * mix)
 }
 
 /** The textures actually used at some height (one, or two with bands). */

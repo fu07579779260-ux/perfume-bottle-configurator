@@ -1,7 +1,8 @@
-import type { DesignConfig } from '@/model/config'
+import type { DesignConfig, ProfilePoint } from '@/model/config'
 import { TECHNOLOGY_DEFAULTS, type AssemblyMethod, type Silhouette } from '@/model/options'
 import { maxWrapTop, shoulderStart, wrapCavityRadius } from './envelope'
 import { meshBounds, revolve, type MeshData } from './mesh'
+import { controlRadius, evalControl } from './profile-curve'
 import { textureOffset, textureSegments, textureStep, type TextureSpan } from './texture'
 
 // The printed shell as a closed side profile swept around the Y axis.
@@ -95,6 +96,10 @@ export interface ShellLayout {
   seat: number
   /** Band of the outer skin that carries the surface texture */
   texture: TextureSpan
+  /** Advanced mode: control points that draw the outline instead of the silhouette */
+  control: ProfilePoint[] | null
+  /** Glass radius, for turning control weights into radii */
+  glassRadius: number
 }
 
 /** Small rounding where the rim meets the opening, so the edge isn't sharp. */
@@ -183,6 +188,8 @@ export function shellLayout(config: DesignConfig): ShellLayout {
   const prism = shape.silhouette === 'prism'
   return {
     silhouette: shape.silhouette,
+    control: config.mode.advanced && shape.profilePoints ? shape.profilePoints : null,
+    glassRadius: bottle.bodyDiameter / 2,
     method,
     floor,
     bottomY,
@@ -289,8 +296,22 @@ function curveRadius(l: ShellLayout, t: number): number {
   return l.topRadius + (l.shoulderRadius - l.topRadius) * Math.sqrt(Math.max(0, 1 - u ** 2.4))
 }
 
+/** Outer radius of the drawn outline at t = 0 (base) … 1 (rim). */
+const drawnRadius = (l: ShellLayout, control: ProfilePoint[], t: number) =>
+  controlRadius({ bodyDiameter: 2 * l.glassRadius }, evalControl(control, t))
+
 /** Outer corners from the base edge up to the rim edge. */
 function outerCorners(l: ShellLayout): Corner[] {
+  if (l.control) {
+    // Advanced mode: the drawn outline
+    const out: Corner[] = []
+    for (let i = 0; i <= CURVE_SAMPLES; i++) {
+      const t = i / CURVE_SAMPLES
+      const edge = i === 0 || i === CURVE_SAMPLES
+      out.push({ r: drawnRadius(l, l.control, t), y: l.bottomY + t * l.height, round: edge ? l.corner : 0, side: 'outer' })
+    }
+    return out
+  }
   if (l.silhouette !== 'column' && l.silhouette !== 'prism') {
     const out: Corner[] = []
     for (let i = 0; i <= CURVE_SAMPLES; i++) {
@@ -480,7 +501,8 @@ export function shellPlacement(config: DesignConfig) {
 /** Outer radius of the shell where it meets the cap (before the rim rounding). */
 export function shellTopRadius(l: ShellLayout): number {
   const curved = l.silhouette === 'teardrop' || l.silhouette === 'pebble' || l.silhouette === 'coral'
-  const top = curved ? l.topRadius : l.silhouette === 'exoskeleton' ? l.baseRadius : l.shoulderRadius
+  const drawn = l.control ? drawnRadius(l, l.control, 1) : null
+  const top = drawn ?? (curved ? l.topRadius : l.silhouette === 'exoskeleton' ? l.baseRadius : l.shoulderRadius)
   return Math.max(top, firmRadius(l, l.topY))
 }
 

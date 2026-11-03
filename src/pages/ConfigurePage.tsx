@@ -5,6 +5,7 @@ import { ParamSlider } from '@/components/panel/controls'
 import { ExportSection } from '@/components/panel/ExportSection'
 import { FitTestSection } from '@/components/panel/FitTestSection'
 import { PersonalSection } from '@/components/panel/PersonalSection'
+import { ProfileEditor } from '@/components/panel/ProfileEditor'
 import { PrintSection } from '@/components/panel/PrintSection'
 import { SilhouettePicker } from '@/components/panel/SilhouettePicker'
 import { TextureSection } from '@/components/panel/TextureSection'
@@ -71,6 +72,19 @@ function BottlePanel() {
 
       <SilhouettePicker />
 
+      <label className="flex cursor-pointer items-start gap-2.5 rounded-lg bg-sand px-3 py-2">
+        <input
+          type="checkbox"
+          checked={config.mode.advanced}
+          onChange={(e) => patch('mode', { advanced: e.target.checked })}
+          className="mt-0.5 size-4 accent-lagoon"
+        />
+        <span>
+          <span className="block text-sm font-medium text-deep">{t('advanced.switch')}</span>
+          <span className="block text-xs text-tide">{t('advanced.switchNote')}</span>
+        </span>
+      </label>
+
       <div className="space-y-3">
         <h2 className="kicker">{t('panel.proportions')}</h2>
         {[...COMMON, ...(SPECIFIC[config.shape.silhouette] ?? [])].map((key) => (
@@ -82,6 +96,7 @@ function BottlePanel() {
             onChange={(v) => patch('shape', { [key]: v })}
           />
         ))}
+        {config.mode.advanced && config.shape.profilePoints && <p className="text-xs text-tide">{t('advanced.slidersNote')}</p>}
         {config.shape.silhouette === 'coral' && (
           <button
             type="button"
@@ -92,6 +107,8 @@ function BottlePanel() {
           </button>
         )}
       </div>
+
+      {config.mode.advanced && <ProfileEditor />}
 
       <TextureSection />
 

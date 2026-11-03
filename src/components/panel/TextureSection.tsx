@@ -3,7 +3,7 @@ import { fill, useT } from '@/i18n/language'
 import { cn } from '@/lib/utils'
 import { RANGES, type TextureConfig } from '@/model/config'
 import { useDesign } from '@/model/design-context'
-import { ALLOWED_TEXTURES, TEXTURES, WAVE_DIRECTIONS, WINDOW_SHAPES, type Texture } from '@/model/options'
+import { ALLOWED_TEXTURES, TEXTURE_ZONES, TEXTURES, WAVE_DIRECTIONS, WINDOW_SHAPES, type Texture } from '@/model/options'
 import { ParamSlider } from './controls'
 
 type TextureSlider = 'fluteCount' | 'fluteDepth' | 'facetCount' | 'waveLength' | 'waveAmplitude' | 'cellSize' | 'cellRim'
@@ -42,6 +42,53 @@ export function TextureSection() {
         ))}
       </div>
       {allowed.length === 1 && <p className="text-xs text-tide">{t('texture.ownStructure')}</p>}
+
+      {config.mode.advanced && (
+        <div className="space-y-2 rounded-lg bg-sand p-3">
+          <p className="text-sm text-deep">{t('texture.zone')}</p>
+          <div role="group" aria-label={t('texture.zone')} className="flex flex-wrap gap-1.5">
+            {TEXTURE_ZONES.map((z) => (
+              <button
+                key={z}
+                type="button"
+                aria-pressed={tex.zone === z}
+                onClick={() => patch('texture', { zone: z })}
+                className={cn(
+                  'rounded-full px-3 py-0.5 text-xs transition-colors',
+                  tex.zone === z ? 'bg-lagoon text-white' : 'bg-shell text-deep ring-1 ring-rule hover:bg-foam',
+                )}
+              >
+                {t(`texture.zone.${z}`)}
+              </button>
+            ))}
+          </div>
+          {tex.zone !== 'whole' && (
+            <ParamSlider label={t('param.zoneSplit')} value={tex.zoneSplit} range={RANGES.texture.zoneSplit} onChange={(zoneSplit) => patch('texture', { zoneSplit })} />
+          )}
+          {tex.zone === 'bands' && (
+            <div>
+              <p className="text-xs text-tide">{t('texture.upper')}</p>
+              <div role="group" aria-label={t('texture.upper')} className="mt-1 flex flex-wrap gap-1.5">
+                {TEXTURES.map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    aria-pressed={tex.upperType === v}
+                    onClick={() => patch('texture', { upperType: v })}
+                    className={cn(
+                      'rounded-full px-3 py-0.5 text-xs transition-colors',
+                      tex.upperType === v ? 'bg-lagoon text-white' : 'bg-shell text-deep ring-1 ring-rule hover:bg-foam',
+                    )}
+                  >
+                    {t(`texture.${v}`)}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-1 text-xs text-tide">{t('texture.lowerIsMain')}</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {tex.type === 'waves' && (
         <div role="group" aria-label={t('texture.direction')} className="flex gap-1.5">

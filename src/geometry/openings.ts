@@ -63,13 +63,18 @@ function area(poly: Hole): number {
 }
 
 /** Cellular openwork: Voronoi cells around jittered seeds, shrunk by half the rim on every side. */
-function cellularHoles(config: DesignConfig, l: ShellLayout, minHole: number): { holes: Hole[]; skipped: number } {
+function cellularHoles(
+  config: DesignConfig,
+  l: ShellLayout,
+  minHole: number,
+  band: [number, number] = [l.texture.from, l.texture.to],
+): { holes: Hole[]; skipped: number } {
   const { cellSize, cellRim } = config.texture
   const radius = l.texture.radius
   const circumference = Math.PI * 2 * radius
   // Keep a solid band at the top and bottom of the pattern
-  const from = l.texture.from + cellRim
-  const to = l.texture.to - cellRim
+  const from = band[0] + cellRim
+  const to = band[1] - cellRim
   const cols = Math.max(3, Math.round(circumference / cellSize))
   const rows = Math.max(1, Math.floor((to - from) / cellSize))
   if (to - from < cellSize * 0.6) return { holes: [], skipped: 0 }
@@ -271,8 +276,17 @@ export function shellOpenings(config: DesignConfig): Openings {
   const l = shellLayout(config)
   const minHole = TECHNOLOGY_DEFAULTS[config.manufacturing.technology].minHole
   const t = config.texture
-  const cellular = t.type === 'cellular' || (t.zone === 'bands' && t.upperType === 'cellular')
-  const cells = cellular ? cellularHoles(config, l, minHole) : { holes: [], skipped: 0 }
+  // Openwork only where its texture is: the whole band, below the split, or in its own band
+  const { from, to, split } = l.texture
+  const band: [number, number] | null =
+    t.zone === 'whole'
+      ? t.type === 'cellular' ? [from, to] : null
+      : t.type === 'cellular'
+        ? [from, split]
+        : t.zone === 'bands' && t.upperType === 'cellular'
+          ? [split, to]
+          : null
+  const cells = band ? cellularHoles(config, l, minHole, band) : { holes: [], skipped: 0 }
   // The frame is all openings already, so it gets no extra windows
   if (config.shape.silhouette === 'exoskeleton') {
     return { radius: l.texture.radius, cells: frameHoles(config, l, minHole), windows: [], skipped: 0 }

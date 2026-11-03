@@ -1,5 +1,5 @@
 import type { DesignConfig } from '@/model/config'
-import { PRINTER_BEDS, TECHNOLOGY_DEFAULTS } from '@/model/options'
+import { ALLOWED_TEXTURES, PRINTER_BEDS, TECHNOLOGY_DEFAULTS } from '@/model/options'
 import { capLayout } from './cap'
 import { meshBounds } from './mesh'
 import { shellOpenings } from './openings'
@@ -21,6 +21,7 @@ export type CheckId =
   | 'cellsSkipped'
   | 'noWindows'
   | 'strutThickened'
+  | 'freeCombo'
 
 export interface Check {
   id: CheckId
@@ -98,6 +99,11 @@ export function designChecks(config: DesignConfig): Check[] {
   }
   if (config.shape.silhouette === 'exoskeleton' && config.shape.strutWidth < tech.minStrut) {
     checks.push({ id: 'strutThickened', level: 'note', values: { min: String(tech.minStrut) } })
+  }
+  const t = config.texture
+  const used = t.zone === 'bands' ? [t.type, t.upperType] : [t.type]
+  if (config.mode.advanced && used.some((x) => !ALLOWED_TEXTURES[config.shape.silhouette].includes(x))) {
+    checks.push({ id: 'freeCombo', level: 'note', values: {} })
   }
   return checks
 }
