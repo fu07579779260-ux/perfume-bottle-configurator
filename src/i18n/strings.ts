@@ -58,6 +58,16 @@ const en = {
   'page.myDesigns.summary': 'Saved designs with versions, notes, photos and fit feedback.',
   'page.pending': 'Coming in a later build step.',
 
+  'panel.label': 'Design steps',
+  'panel.bottle': 'Glass bottle',
+  'panel.liquid': 'Perfume colour (preview)',
+  'panel.pending': 'The full step panel (silhouette, proportions, texture, cap, personalise, export) comes in later build steps.',
+  'viewport.glass': 'Glass bottle',
+  'viewport.hint': 'Drag to turn · scroll to zoom',
+  'viewport.loading': 'Loading the 3D preview…',
+  'viewport.failed': 'The 3D preview could not start.',
+  'viewport.noWebgl': 'This browser cannot show 3D (WebGL is off or not supported).',
+
   'footer.tagline': 'Glass inside, printed outside.',
   'footer.units': 'All dimensions in mm',
   'footer.workshop': 'Configurable 3D-printed products workshop',
@@ -122,6 +132,16 @@ const zh: Record<StringKey, string> = {
   'page.myDesigns.title': '我的设计',
   'page.myDesigns.summary': '保存的设计，包括版本、笔记、照片和试装反馈。',
   'page.pending': '会在后面的步骤中完成。',
+
+  'panel.label': '设计步骤',
+  'panel.bottle': '玻璃内胆',
+  'panel.liquid': '香水颜色（预览）',
+  'panel.pending': '完整的分步面板（轮廓、比例、纹理、瓶盖、个性化、导出）会在后面的步骤中加入。',
+  'viewport.glass': '玻璃内胆',
+  'viewport.hint': '拖动旋转 · 滚轮缩放',
+  'viewport.loading': '正在加载 3D 预览…',
+  'viewport.failed': '3D 预览无法启动。',
+  'viewport.noWebgl': '这个浏览器无法显示 3D（WebGL 未开启或不支持）。',
 
   'footer.tagline': '玻璃在内，打印在外。',
   'footer.units': '所有尺寸单位为 mm',

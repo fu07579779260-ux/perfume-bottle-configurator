@@ -8,6 +8,13 @@ export type BottlePreset = (typeof BOTTLE_PRESETS)[number]
 export const NECK_FINISHES = ['13-415', '15-415', '18-415', 'custom'] as const
 export type NeckFinish = (typeof NECK_FINISHES)[number]
 
+/** Outer diameter of the glass neck thread (the first number of the GPI finish). */
+export const NECK_OUTER_DIAMETER: Record<Exclude<NeckFinish, 'custom'>, number> = {
+  '13-415': 13,
+  '15-415': 15,
+  '18-415': 18,
+}
+
 /**
  * Placeholder dimensions of the glass bottles (mm). Build step 4 replaces
  * them with measurements of the bottles we actually buy.

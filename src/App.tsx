@@ -3,8 +3,8 @@ import { AppFooter } from '@/components/layout/AppFooter'
 import { AppHeader } from '@/components/layout/AppHeader'
 import { useT } from '@/i18n/language'
 import { useRoute, type Route } from '@/lib/router'
+import { ConfigurePage } from '@/pages/ConfigurePage'
 import {
-  ConfigurePage,
   GuidePage,
   HomePage,
   InspirationPage,

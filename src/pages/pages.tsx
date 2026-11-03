@@ -86,11 +86,6 @@ export function HomePage() {
   )
 }
 
-export function ConfigurePage() {
-  const t = useT()
-  return <PagePlaceholder title={t('page.configure.title')} summary={t('page.configure.summary')} />
-}
-
 export function InspirationPage() {
   const t = useT()
   return <PagePlaceholder title={t('page.inspiration.title')} summary={t('page.inspiration.summary')} />
