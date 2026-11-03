@@ -30,6 +30,10 @@ export function useLanguage() {
   return useContext(LanguageContext)
 }
 
+/** Fill {placeholders} in a translated string, e.g. fill(t('x'), { min: '1.6' }). */
+export const fill = (template: string, values: Record<string, string>) =>
+  template.replace(/\{(\w+)\}/g, (_, key: string) => values[key] ?? `{${key}}`)
+
 /** Translate a UI string key into the current language. */
 export function useT() {
   const { lang } = useLanguage()

@@ -19,6 +19,7 @@
   --lagoon: #2b7a74; /* primary actions */
   --foam: #d5e8e2; /* soft fills, selected states */
   --coral: #d9694c; /* the single warm accent */
+  --coral-ink: #a13d24; /* coral for warning text, 5.6:1 on shell */
   --rule: #e3d9c8; /* hairlines */
 
   --background: var(--sand);
@@ -58,6 +59,7 @@
   --color-lagoon: var(--lagoon);
   --color-foam: var(--foam);
   --color-coral: var(--coral);
+  --color-coral-ink: var(--coral-ink);
   --color-rule: var(--rule);
 
   --color-background: var(--background);

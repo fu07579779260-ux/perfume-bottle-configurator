@@ -1,7 +1,9 @@
 import { lazy, Suspense } from 'react'
+import { ParamSlider } from '@/components/panel/controls'
 import { ViewportErrorBoundary } from '@/components/viewport/ViewportErrorBoundary'
 import { useT } from '@/i18n/language'
 import { cn } from '@/lib/utils'
+import { RANGES } from '@/model/config'
 import { useDesign } from '@/model/design-context'
 import { BOTTLE_PRESETS } from '@/model/options'
 
@@ -11,7 +13,9 @@ const Viewport = lazy(() => import('@/components/viewport/Viewport'))
 /** Perfume colours for the preview liquid */
 const LIQUIDS = ['#f2c46d', '#f4dfe6', '#cfe8f2', '#d9ecc8', '#e9a07a']
 
-// Temporary panel until the step panel arrives: bottle size and liquid colour
+const PROPORTIONS = ['heightExtra', 'shoulderHeight', 'shoulderExtra', 'baseExtra', 'cornerRadius', 'sectionRatio'] as const
+
+// Temporary panel until the step panel arrives: bottle size, Column proportions, fit and liquid colour
 function BottlePanel() {
   const t = useT()
   const { config, patch } = useDesign()
@@ -36,6 +40,29 @@ function BottlePanel() {
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="space-y-3">
+        <h2 className="kicker">{t('panel.proportions')}</h2>
+        {PROPORTIONS.map((key) => (
+          <ParamSlider
+            key={key}
+            label={t(`param.${key}`)}
+            value={config.shape[key]}
+            range={RANGES.shape[key]}
+            onChange={(v) => patch('shape', { [key]: v })}
+          />
+        ))}
+      </div>
+
+      <div className="space-y-3">
+        <h2 className="kicker">{t('panel.fit')}</h2>
+        <ParamSlider
+          label={t('param.clearance')}
+          value={config.assembly.clearance}
+          range={RANGES.assembly.clearance}
+          onChange={(clearance) => patch('assembly', { clearance })}
+        />
       </div>
 
       <div>

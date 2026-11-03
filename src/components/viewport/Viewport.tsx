@@ -1,10 +1,13 @@
 import { ContactShadows, Environment, Lightformer, OrbitControls } from '@react-three/drei'
 import { Canvas, useThree } from '@react-three/fiber'
-import { useLayoutEffect } from 'react'
+import { useLayoutEffect, useMemo, useState } from 'react'
 import { bottleTotalHeight } from '@/geometry/bottle'
-import { useT } from '@/i18n/language'
+import { buildShellMesh, checkWall, shellLayout, shellSize } from '@/geometry/shell'
+import { fill, useT } from '@/i18n/language'
+import { cn } from '@/lib/utils'
 import { useDesign } from '@/model/design-context'
 import { GlassBottle } from './GlassBottle'
+import { Shell } from './Shell'
 
 // Scene units are millimetres, Y up, Y = 0 at the base of the glass bottle.
 // Colours follow the ocean theme tokens.
@@ -56,11 +59,19 @@ export default function Viewport() {
   const t = useT()
   const { config } = useDesign()
   const { bottle } = config
+  const [seeThrough, setSeeThrough] = useState(false)
 
+  const shell = useMemo(() => buildShellMesh(config), [config])
+  const { bottomY } = shellLayout(config)
+  const size = shellSize(config)
+  const wall = checkWall(config)
+
+  // Frame the glass bottle with its pump; the shell's own edits don't move the camera
   const height = bottleTotalHeight(bottle)
   const distance = height * DISTANCE_PER_MM
-  const targetY = height * 0.48
+  const targetY = height * 0.46
   const homeKey = `${bottle.bodyDiameter}:${height}`
+  const mm = (v: number) => v.toFixed(1)
 
   return (
     <div className="relative h-full min-h-80 overflow-hidden rounded-xl bg-[#eef1ea] shadow-[0_1px_0_var(--rule)]">
@@ -76,8 +87,14 @@ export default function Viewport() {
         <StudioLight />
 
         <GlassBottle bottle={bottle} liquidColour={config.personal.liquidColour} />
+        <Shell
+          mesh={shell}
+          colour={config.personal.shellColour}
+          finish={config.personal.finish}
+          seeThrough={seeThrough}
+        />
         <ContactShadows
-          position={[0, -0.01, 0]}
+          position={[0, bottomY - 0.01, 0]}
           scale={bottle.bodyDiameter * 4}
           far={height * 0.6}
           blur={2.4}
@@ -101,13 +118,41 @@ export default function Viewport() {
         />
       </Canvas>
 
-      <div className="pointer-events-none absolute top-0 left-0 p-4">
-        <p className="kicker">{t('viewport.glass')}</p>
-        <p className="mt-1 text-sm text-deep tabular-nums">
-          Ø {bottle.bodyDiameter} × {height.toFixed(1)} mm
-        </p>
+      {/* role=status: screen readers hear the new size and wall check after each change */}
+      <dl
+        role="status"
+        className="pointer-events-none absolute bottom-3 left-3 max-w-[calc(100%-1.5rem)] space-y-1 rounded-lg bg-shell/85 px-3 py-2 text-xs tabular-nums backdrop-blur-sm"
+      >
+        <div className="flex flex-wrap gap-x-2">
+          <dt className="text-tide">{t('viewport.shell')}</dt>
+          <dd className="text-deep">
+            {mm(size.width)} × {mm(size.depth)} × {mm(size.height)} mm
+          </dd>
+        </div>
+        <div className="flex flex-wrap gap-x-2">
+          <dt className="text-tide">{t('viewport.wall')}</dt>
+          <dd className={cn(wall.ok ? 'text-deep' : 'font-semibold text-coral-ink')}>
+            {mm(wall.minWall)} mm{' '}
+            {wall.ok
+              ? fill(t('viewport.wallOk'), { min: mm(wall.required) })
+              : fill(t('viewport.wallThin'), { min: mm(wall.required) })}
+          </dd>
+        </div>
+      </dl>
+      <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4">
+        <p className="text-xs text-tide">{t('viewport.hint')}</p>
+        <button
+          type="button"
+          aria-pressed={seeThrough}
+          onClick={() => setSeeThrough((v) => !v)}
+          className={cn(
+            'pointer-events-auto shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium shadow-sm transition-colors',
+            seeThrough ? 'bg-deep text-sand' : 'bg-shell text-deep hover:bg-foam',
+          )}
+        >
+          {t('viewport.seeThrough')}
+        </button>
       </div>
-      <p className="pointer-events-none absolute right-4 bottom-3 text-xs text-tide">{t('viewport.hint')}</p>
     </div>
   )
 }
