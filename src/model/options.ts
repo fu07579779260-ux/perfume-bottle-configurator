@@ -73,7 +73,7 @@ export const SILHOUETTE_STARTS: Record<Silhouette, { sectionRatio?: number; base
   prism: {},
   pebble: { baseExtra: 8, shoulderExtra: 26, sectionRatio: 0.65 },
   exoskeleton: { baseExtra: 10, shoulderExtra: 16 },
-  coral: {},
+  coral: { baseExtra: 12, shoulderExtra: 22 },
 }
 
 // ---------- Texture ----------

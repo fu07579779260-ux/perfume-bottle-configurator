@@ -30,6 +30,8 @@ type ShapeSlider =
   | 'prismTwist'
   | 'strutCount'
   | 'strutWidth'
+  | 'holeDensity'
+  | 'grooveDepth'
 
 const COMMON: ShapeSlider[] = ['heightExtra', 'shoulderHeight', 'shoulderExtra', 'baseExtra', 'cornerRadius']
 /** Extra sliders that only mean something for one silhouette */
@@ -38,6 +40,7 @@ const SPECIFIC: Partial<Record<string, ShapeSlider[]>> = {
   pebble: ['sectionRatio'],
   prism: ['prismSides', 'prismTwist'],
   exoskeleton: ['strutCount', 'strutWidth'],
+  coral: ['grooveDepth', 'holeDensity'],
 }
 
 // Temporary panel until the step panel arrives: bottle, silhouette, proportions, fit and liquid colour
@@ -80,6 +83,15 @@ function BottlePanel() {
             onChange={(v) => patch('shape', { [key]: v })}
           />
         ))}
+        {config.shape.silhouette === 'coral' && (
+          <button
+            type="button"
+            onClick={() => patch('shape', { growthSeed: Math.floor(Math.random() * 10000) })}
+            className="rounded-full bg-foam/70 px-3.5 py-1 text-sm text-deep hover:bg-foam"
+          >
+            {t('shape.newGrowth')}
+          </button>
+        )}
       </div>
 
       <TextureSection />

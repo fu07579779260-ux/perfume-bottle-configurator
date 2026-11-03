@@ -1,5 +1,6 @@
 import type { DesignConfig } from '@/model/config'
 import type { Texture } from '@/model/options'
+import { periodicNoise } from './noise'
 
 // Surface textures as a radial offset of the outer skin (PLAN.md §4.4).
 // Grooves and facets cut in (negative), waves go both ways; the shell clamps
@@ -17,6 +18,24 @@ export interface TextureSpan {
 
 /** Fade at the ends of the band, so the texture runs out smoothly. */
 const FADE = 2.5
+/** Size of one meander of the brain-coral grooves, in mm */
+const CORAL_SCALE = 9
+/** Half-width of a coral groove, in noise units */
+const CORAL_GROOVE = 0.12
+
+/**
+ * Brain-coral grooves: channels along the zero lines of seeded noise, which
+ * wander and branch like the folds of a brain coral. 0 … −depth.
+ */
+export function coralGroove(config: DesignConfig, span: TextureSpan, y: number, a: number): number {
+  const depth = config.shape.grooveDepth
+  if (depth <= 0) return 0
+  const circumference = Math.PI * 2 * span.radius
+  const period = Math.max(3, Math.round(circumference / CORAL_SCALE))
+  const x = (a / (Math.PI * 2)) * period
+  const n = periodicNoise(config.shape.growthSeed, x, (y - span.from) / CORAL_SCALE, period)
+  return -depth * (1 - smoothstep(Math.abs(n) / CORAL_GROOVE))
+}
 
 const smoothstep = (u: number) => {
   const t = Math.min(1, Math.max(0, u))
@@ -57,6 +76,8 @@ function offsetOf(config: DesignConfig, type: Texture, span: TextureSpan, y: num
 export function textureOffset(config: DesignConfig, span: TextureSpan, y: number, a: number, r: number): number {
   if (y <= span.from || y >= span.to) return 0
   const fade = smoothstep((y - span.from) / FADE) * smoothstep((span.to - y) / FADE)
+  // The coral carries its own grooves instead of a texture
+  if (config.shape.silhouette === 'coral') return fade * coralGroove(config, span, y, a)
   const { type, zone, upperType } = config.texture
   if (zone === 'whole') return fade * offsetOf(config, type, span, y, a, r)
   // Lower part only, or two bands that cross-fade over 2 mm at the split
@@ -77,6 +98,8 @@ function usedTextures(config: DesignConfig): Texture[] {
 export function textureSegments(config: DesignConfig, base: number): number {
   const t = config.texture
   const scale = base / 96
+  // Coral grooves are about 2 mm wide: about 0.5 mm between points
+  if (config.shape.silhouette === 'coral' && config.shape.grooveDepth > 0) return Math.min(480, base * 3)
   let need = base
   for (const type of usedTextures(config)) {
     if (type === 'fluted') need = Math.max(need, t.fluteCount * 5 * scale)
@@ -87,6 +110,7 @@ export function textureSegments(config: DesignConfig, base: number): number {
 
 /** Longest vertical step of the outer profile that still resolves the texture. */
 export function textureStep(config: DesignConfig, span: TextureSpan): number {
+  if (config.shape.silhouette === 'coral' && config.shape.grooveDepth > 0) return 0.5
   let step = 2
   for (const type of usedTextures(config)) {
     if (type === 'waves') step = Math.min(step, config.texture.waveLength / 12)

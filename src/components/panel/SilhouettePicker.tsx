@@ -4,8 +4,7 @@ import { cn } from '@/lib/utils'
 import { useDesign } from '@/model/design-context'
 import { SILHOUETTES, type Silhouette } from '@/model/options'
 
-/** Coral arrives in build step 15. */
-const READY: readonly Silhouette[] = ['column', 'teardrop', 'prism', 'pebble', 'exoskeleton']
+const READY: readonly Silhouette[] = SILHOUETTES
 
 export function SilhouettePicker() {
   const t = useT()

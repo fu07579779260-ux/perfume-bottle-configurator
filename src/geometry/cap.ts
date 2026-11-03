@@ -108,7 +108,7 @@ function curve(config: DesignConfig, c: CapLayout, t: number): number | null {
   switch (c.form) {
     case 'follow':
       if (silhouette === 'teardrop') return R * (1 - t ** 1.8) ** 0.6
-      if (silhouette === 'pebble') return R * Math.sqrt(Math.max(0, 1 - t ** 2.4))
+      if (silhouette === 'pebble' || silhouette === 'coral') return R * Math.sqrt(Math.max(0, 1 - t ** 2.4))
       return null
     case 'sculptural': {
       const style = config.cap.sculpturalStyle

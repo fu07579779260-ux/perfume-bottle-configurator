@@ -5,8 +5,8 @@ import { shellLayout, type ShellLayout } from './shell'
 
 // Openings through the shell wall (PLAN.md §4.4): cellular openwork (a
 // Voronoi pattern of holes that lets the glass show through), viewing
-// windows for the perfume level, and the panels between the struts of the
-// Exoskeleton Frame. Both are worked out flat, on the shell's
+// windows for the perfume level, the panels between the struts of the
+// Exoskeleton Frame, and the pores of the Coral. Both are worked out flat, on the shell's
 // surface unrolled around its circumference (u = arc length, y = height),
 // and every hole becomes a convex cutter that reaches through the wall.
 
@@ -119,6 +119,45 @@ function cellularHoles(config: DesignConfig, l: ShellLayout, minHole: number): {
     holes.push(poly)
   }
   return { holes, skipped }
+}
+
+/** Most pores at full density: one per this many mm² of surface */
+const PORE_AREA = 70
+/** Solid left between two pores */
+const PORE_RIM = 2
+
+/**
+ * Coral pores: round holes of mixed sizes scattered without touching (dart
+ * throwing with the growth seed). Hole density 0 gives none.
+ */
+function coralPores(config: DesignConfig, l: ShellLayout, minHole: number): { holes: Hole[]; skipped: number } {
+  const density = config.shape.holeDensity
+  if (density <= 0) return { holes: [], skipped: 0 }
+  const circumference = Math.PI * 2 * l.texture.radius
+  const { from, to } = l.texture
+  const target = Math.round((density * circumference * (to - from)) / PORE_AREA)
+  const rand = mulberry32(config.shape.growthSeed * 104729 + 3)
+  const smallest = Math.max(minHole / 2, 1.5)
+  const placed: [number, number, number][] = []
+  for (let tries = 0; tries < target * 30 && placed.length < target; tries++) {
+    const r = smallest + rand() * Math.max(0.5, 4.5 - smallest)
+    const u = rand() * circumference
+    const y = from + r + PORE_RIM + rand() * Math.max(0, to - from - 2 * (r + PORE_RIM))
+    if (y + r + PORE_RIM > to) continue
+    // Distance across the seam too
+    const clear = placed.every(([pu, py, pr]) => {
+      const du = Math.min(Math.abs(u - pu), circumference - Math.abs(u - pu))
+      return Math.hypot(du, y - py) >= r + pr + PORE_RIM
+    })
+    if (clear) placed.push([u, y, r])
+  }
+  const holes = placed.map(([u, y, r]) =>
+    Array.from({ length: 12 }, (_, k) => {
+      const a = (k / 12) * Math.PI * 2
+      return [u + r * Math.cos(a), y + r * Math.sin(a)] as [number, number]
+    }),
+  )
+  return { holes, skipped: 0 }
 }
 
 /** A rounded rectangle centred on (u, y), as a convex outline. */
@@ -237,6 +276,10 @@ export function shellOpenings(config: DesignConfig): Openings {
   // The frame is all openings already, so it gets no extra windows
   if (config.shape.silhouette === 'exoskeleton') {
     return { radius: l.texture.radius, cells: frameHoles(config, l, minHole), windows: [], skipped: 0 }
+  }
+  if (config.shape.silhouette === 'coral') {
+    const pores = coralPores(config, l, minHole)
+    return { radius: l.texture.radius, cells: pores.holes, windows: windowHoles(config, l), skipped: 0 }
   }
   return { radius: l.texture.radius, cells: cells.holes, windows: windowHoles(config, l), skipped: cells.skipped }
 }
