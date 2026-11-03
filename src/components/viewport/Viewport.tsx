@@ -2,7 +2,8 @@ import { ContactShadows, Environment, Lightformer, OrbitControls } from '@react-
 import { Canvas, useThree } from '@react-three/fiber'
 import { useLayoutEffect, useMemo, useState } from 'react'
 import { bottleTotalHeight } from '@/geometry/bottle'
-import { buildShellMesh, checkOverhang, checkWall, shellLayout, shellSize } from '@/geometry/shell'
+import { previewParts } from '@/geometry/parts'
+import { checkOverhang, checkWall, shellLayout, shellSize } from '@/geometry/shell'
 import { fill, useT } from '@/i18n/language'
 import { cn } from '@/lib/utils'
 import { useDesign } from '@/model/design-context'
@@ -61,7 +62,8 @@ export default function Viewport() {
   const { bottle } = config
   const [seeThrough, setSeeThrough] = useState(false)
 
-  const shell = useMemo(() => buildShellMesh(config), [config])
+  const parts = useMemo(() => previewParts(config), [config])
+  const shell = parts[0].mesh
   const { bottomY } = shellLayout(config)
   const size = shellSize(config, shell)
   const wall = checkWall(config)
@@ -88,12 +90,15 @@ export default function Viewport() {
         <StudioLight />
 
         <GlassBottle bottle={bottle} liquidColour={config.personal.liquidColour} />
-        <Shell
-          mesh={shell}
-          colour={config.personal.shellColour}
-          finish={config.personal.finish}
-          seeThrough={seeThrough}
-        />
+        {parts.map((part) => (
+          <Shell
+            key={part.id}
+            mesh={part.mesh}
+            colour={config.personal.shellColour}
+            finish={config.personal.finish}
+            seeThrough={seeThrough}
+          />
+        ))}
         <ContactShadows
           position={[0, bottomY - 0.01, 0]}
           scale={bottle.bodyDiameter * 4}
