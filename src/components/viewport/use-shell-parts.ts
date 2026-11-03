@@ -1,45 +1,40 @@
 import { useEffect, useMemo, useState } from 'react'
+import type { Marks } from '@/geometry/marks'
 import { loadManifold } from '@/geometry/manifold-loader'
-import type { MeshData } from '@/geometry/mesh'
 import { hasOpenings } from '@/geometry/openings'
-import { cutShell, previewParts, type Part } from '@/geometry/parts'
+import { finishedPreview, needsKernel, previewParts, type Part } from '@/geometry/parts'
 import type { DesignConfig } from '@/model/config'
 
 /** Wait this long after the last change before cutting, so dragging a slider stays smooth. */
 const SETTLE_MS = 120
 
 /**
- * Parts for the preview. The uncut shell shows at once; when the design has
- * openwork or windows, the geometry kernel cuts them a moment later and the
- * cut shell takes its place. The last cut stays on screen while the next one
- * is worked out, so the view doesn't flicker.
+ * Parts for the preview. The plain parts show at once; when the design has
+ * openings or marks, the geometry kernel adds them a moment later and the
+ * finished parts take their place. The last result stays on screen while the
+ * next one is worked out, so the view doesn't flicker.
  */
-export function useShellParts(config: DesignConfig): { parts: Part[]; cutting: boolean } {
+export function useShellParts(config: DesignConfig, marks: Marks): { parts: Part[]; cutting: boolean } {
   const parts = useMemo(() => previewParts(config), [config])
-  const openings = useMemo(() => hasOpenings(config), [config])
-  const [cut, setCut] = useState<{ config: DesignConfig; mesh: MeshData } | null>(null)
+  const kernel = useMemo(() => needsKernel(config, marks, hasOpenings(config)), [config, marks])
+  const [done, setDone] = useState<{ config: DesignConfig; marks: Marks; parts: Part[] } | null>(null)
 
   useEffect(() => {
-    if (!openings) return
+    if (!kernel) return
     let cancelled = false
     const timer = setTimeout(() => {
       loadManifold()
         .then((wasm) => {
-          if (cancelled) return
-          const mesh = cutShell(wasm, config)
-          if (mesh) setCut({ config, mesh })
+          if (!cancelled) setDone({ config, marks, parts: finishedPreview(wasm, config, marks) })
         })
-        .catch((error) => console.error('Could not cut the openings', error))
+        .catch((error) => console.error('Could not finish the preview', error))
     }, SETTLE_MS)
     return () => {
       cancelled = true
       clearTimeout(timer)
     }
-  }, [config, openings])
+  }, [config, marks, kernel])
 
-  if (!openings || !cut) return { parts, cutting: openings }
-  return {
-    parts: parts.map((p) => (p.id === 'shell' ? { ...p, mesh: cut.mesh } : p)),
-    cutting: cut.config !== config,
-  }
+  if (!kernel || !done) return { parts, cutting: kernel }
+  return { parts: done.parts, cutting: done.config !== config || done.marks !== marks }
 }

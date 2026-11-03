@@ -4,6 +4,7 @@ import { CapSection } from '@/components/panel/CapSection'
 import { ParamSlider } from '@/components/panel/controls'
 import { ExportSection } from '@/components/panel/ExportSection'
 import { FitTestSection } from '@/components/panel/FitTestSection'
+import { PersonalSection } from '@/components/panel/PersonalSection'
 import { PrintSection } from '@/components/panel/PrintSection'
 import { SilhouettePicker } from '@/components/panel/SilhouettePicker'
 import { TextureSection } from '@/components/panel/TextureSection'
@@ -16,9 +17,6 @@ import { BOTTLE_PRESETS } from '@/model/options'
 
 // three.js is large; load it only when the configurator opens
 const Viewport = lazy(() => import('@/components/viewport/Viewport'))
-
-/** Perfume colours for the preview liquid */
-const LIQUIDS = ['#f2c46d', '#f4dfe6', '#cfe8f2', '#d9ecc8', '#e9a07a']
 
 type ShapeSlider =
   | 'heightExtra'
@@ -111,25 +109,7 @@ function BottlePanel() {
         />
       </div>
 
-      <div>
-        <h2 className="kicker">{t('panel.liquid')}</h2>
-        <div role="group" aria-label={t('panel.liquid')} className="mt-3 flex gap-2">
-          {LIQUIDS.map((c) => (
-            <button
-              key={c}
-              type="button"
-              aria-label={c}
-              aria-pressed={config.personal.liquidColour === c}
-              onClick={() => patch('personal', { liquidColour: c })}
-              style={{ backgroundColor: c }}
-              className={cn(
-                'size-8 rounded-full ring-offset-2 ring-offset-shell transition-shadow',
-                config.personal.liquidColour === c ? 'ring-2 ring-deep' : 'ring-1 ring-rule',
-              )}
-            />
-          ))}
-        </div>
-      </div>
+      <PersonalSection />
 
       <PrintSection />
 

@@ -10,6 +10,7 @@ import { useDesign } from '@/model/design-context'
 import { GlassBottle } from './GlassBottle'
 import { Shell } from './Shell'
 import { useShellParts } from './use-shell-parts'
+import { useMarks } from '@/personal/use-marks'
 
 // Scene units are millimetres, Y up, Y = 0 at the base of the glass bottle.
 // Colours follow the ocean theme tokens.
@@ -63,7 +64,8 @@ export default function Viewport() {
   const { bottle } = config
   const [seeThrough, setSeeThrough] = useState(false)
 
-  const { parts, cutting } = useShellParts(config)
+  const marks = useMarks(config)
+  const { parts, cutting } = useShellParts(config, marks)
   const shell = parts[0].mesh
   const { bottomY } = shellLayout(config)
   const size = shellSize(config, shell)

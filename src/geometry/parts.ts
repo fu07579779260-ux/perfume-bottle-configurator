@@ -3,6 +3,7 @@ import type { DesignConfig } from '@/model/config'
 import { fromManifold, toManifold } from './manifold-mesh'
 import { mergeMeshes, meshBounds, translate, type MeshData } from './mesh'
 import { buildCapMesh, capProfile } from './cap'
+import { applyMarks, markItems, type Face, type MarkItem, type Marks } from './marks'
 import { frameLayout, openingCutter } from './openings'
 import { buildBaseCapMesh, buildShellMesh, shellLayout, shellProfile, shellTopRadius } from './shell'
 
@@ -136,30 +137,68 @@ export function jointInfo(config: DesignConfig): JointInfo {
   return { kind: 'dowels', count: plan.spots.length, diameter: plan.size, length: 2 * DOWEL_HOLE - 0.6, fits }
 }
 
+const NO_MARKS: Marks = { text: null, logo: null, number: null }
+
+/** Magnet pockets for the cap: through the seat into both the shell and the cap. Caller deletes them. */
+function capMagnetTools(wasm: ManifoldToplevel, config: DesignConfig): Manifold[] {
+  const l = shellLayout(config)
+  const plan = capMagnetPlan(config)
+  return (plan?.spots ?? []).map((z) =>
+    wasm.Manifold.cylinder(2 * plan!.depth, plan!.radius, plan!.radius, 32, true)
+      .rotate([90, 0, 0])
+      .translate([0, l.topY, z]),
+  )
+}
+
+/** Faces of the shell that carry marks: front and back, and the base unless a base cap closes it. */
+const shellFaces = (config: DesignConfig): Face[] =>
+  config.assembly.method === 'bottom' ? ['front', 'back'] : ['front', 'back', 'base']
+
+/** The whole shell with openings, pockets and marks (before any split). Caller deletes it. */
+function finishedShell(wasm: ManifoldToplevel, config: DesignConfig, segments: number, items: MarkItem[], capTools: Manifold[]): Manifold {
+  const openings = openingCutter(wasm, config)
+  const shell = cutAll([toManifold(wasm, buildShellMesh(config, segments))], [...(openings ? [openings] : []), ...capTools])[0]
+  openings?.delete()
+  return applyMarks(wasm, config, shell, items, shellFaces(config))
+}
+
+/** The base cap with its coin slot and marks, or null without one. Caller deletes it. */
+function finishedBase(wasm: ManifoldToplevel, config: DesignConfig, segments: number, items: MarkItem[]): Manifold | null {
+  const l = shellLayout(config)
+  const base = buildBaseCapMesh(config, segments)
+  if (!base || !l.baseFit) return null
+  let solid = toManifold(wasm, base)
+  if (l.baseFit.kind === 'thread') {
+    // A coin slot underneath, to screw the base cap in and out
+    const slot = wasm.Manifold.cube([16, 3, 1.4], true).translate([0, l.baseFit.bottomY, 0])
+    solid = cutAll([solid], [slot])[0]
+    slot.delete()
+  }
+  return applyMarks(wasm, config, solid, items, ['base'])
+}
+
+/** The cap with its magnet pockets and marks. Caller deletes it. */
+function finishedCap(wasm: ManifoldToplevel, config: DesignConfig, segments: number, items: MarkItem[], capTools: Manifold[]): Manifold {
+  const cap = cutAll([toManifold(wasm, buildCapMesh(config, segments))], capTools)[0]
+  return applyMarks(wasm, config, cap, items, ['capTop'])
+}
+
 /**
- * Every printable part with its holes, pockets and slots, still in place
- * around the bottle. Needs the geometry kernel for the cuts.
+ * Every printable part with its holes, pockets, slots and marks, still in
+ * place around the bottle. Needs the geometry kernel for the cuts.
  */
-export function printParts(wasm: ManifoldToplevel, config: DesignConfig, segments = 192): Part[] {
+export function printParts(wasm: ManifoldToplevel, config: DesignConfig, segments = 192, marks: Marks = NO_MARKS): Part[] {
   const l = shellLayout(config)
   const holeClear = config.manufacturing.technology === 'fdm' ? 0.15 : 0.1
+  const items = markItems(config, marks)
   const parts: Part[] = []
   const done = (id: PartId, m: Manifold) => {
     parts.push({ id, mesh: fromManifold(m) })
     m.delete()
   }
 
-  // Magnet pockets for the cap go through the seat into both the shell and the cap
-  const capMagnets = capMagnetPlan(config)
-  const capTools = (capMagnets?.spots ?? []).map((z) =>
-    wasm.Manifold.cylinder(2 * capMagnets!.depth, capMagnets!.radius, capMagnets!.radius, 32, true)
-      .rotate([90, 0, 0])
-      .translate([0, l.topY, z]),
-  )
-  // Openwork and windows, then the cap's magnet pockets
-  const openings = openingCutter(wasm, config)
-  let shell = cutAll([toManifold(wasm, buildShellMesh(config, segments))], [...(openings ? [openings] : []), ...capTools])[0]
-  openings?.delete()
+  const capTools = capMagnetTools(wasm, config)
+  const shell = finishedShell(wasm, config, segments, items, capTools)
 
   if (l.method === 'halves') {
     const [front, back] = shell.splitByPlane([0, 0, 1], 0)
@@ -182,27 +221,41 @@ export function printParts(wasm: ManifoldToplevel, config: DesignConfig, segment
     }
   } else {
     done('shell', shell)
-    shell = undefined as never
   }
 
-  const base = buildBaseCapMesh(config, segments)
-  if (base && l.baseFit) {
-    if (l.baseFit.kind === 'thread') {
-      // A coin slot underneath, to screw the base cap in and out
-      const slot = wasm.Manifold.cube([16, 3, 1.4], true).translate([0, l.baseFit.bottomY, 0])
-      done('base', cutAll([toManifold(wasm, base)], [slot])[0])
-      slot.delete()
-    } else {
-      parts.push({ id: 'base', mesh: base })
-    }
-  }
-
-  done('cap', cutAll([toManifold(wasm, buildCapMesh(config, segments))], capTools)[0])
+  const base = finishedBase(wasm, config, segments, items)
+  if (base) done('base', base)
+  done('cap', finishedCap(wasm, config, segments, items, capTools))
   capTools.forEach((t) => t.delete())
   return parts
 }
 
-/** The shell with its openings cut (for the preview), or null when it has none. */
+/** True when the preview needs the geometry kernel: openings, or marks to add or cut. */
+export function needsKernel(config: DesignConfig, marks: Marks, openings: boolean): boolean {
+  return openings || markItems(config, marks).length > 0
+}
+
+/**
+ * The preview parts with everything the kernel adds (openings, pockets,
+ * marks), still whole (halves aren't split in the preview).
+ */
+export function finishedPreview(wasm: ManifoldToplevel, config: DesignConfig, marks: Marks, segments = 96): Part[] {
+  const items = markItems(config, marks)
+  const capTools = capMagnetTools(wasm, config)
+  const parts: Part[] = []
+  const done = (id: PartId, m: Manifold) => {
+    parts.push({ id, mesh: fromManifold(m) })
+    m.delete()
+  }
+  done('shell', finishedShell(wasm, config, segments, items, capTools))
+  const base = finishedBase(wasm, config, segments, items)
+  if (base) done('base', base)
+  done('cap', finishedCap(wasm, config, segments, items, capTools))
+  capTools.forEach((t) => t.delete())
+  return parts
+}
+
+/** The shell with its openings cut, or null when it has none (used by tests). */
 export function cutShell(wasm: ManifoldToplevel, config: DesignConfig, segments = 96): MeshData | null {
   const openings = openingCutter(wasm, config)
   if (!openings) return null

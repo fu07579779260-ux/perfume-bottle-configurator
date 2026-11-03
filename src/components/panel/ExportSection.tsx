@@ -10,6 +10,7 @@ import { checkWall } from '@/geometry/shell'
 import { fill, useT } from '@/i18n/language'
 import type { StringKey } from '@/i18n/strings'
 import { useDesign } from '@/model/design-context'
+import { useMarks } from '@/personal/use-marks'
 
 /** Higher resolution than the preview, so curves print smoothly */
 const EXPORT_SEGMENTS = 192
@@ -18,6 +19,7 @@ export function ExportSection() {
   const t = useT()
   const { config } = useDesign()
   const [last, setLast] = useState<{ name: string; triangles: number; kb: number } | null>(null)
+  const marks = useMarks(config)
   const [busy, setBusy] = useState(false)
   const [failed, setFailed] = useState(false)
   const wall = checkWall(config)
@@ -32,7 +34,7 @@ export function ExportSection() {
     try {
       // The geometry kernel cuts the halves, holes and slots
       const wasm = await loadManifold()
-      const mesh = layoutForPrint(printParts(wasm, config, EXPORT_SEGMENTS))
+      const mesh = layoutForPrint(printParts(wasm, config, EXPORT_SEGMENTS, marks))
       const name = shellFileName(config)
       const stl = toBinaryStl(mesh, `Perfume bottle shell - ${name}`)
       downloadFile(stl, name, 'model/stl')
