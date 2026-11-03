@@ -3,6 +3,7 @@ import type { DesignConfig } from '@/model/config'
 import { fromManifold, toManifold } from './manifold-mesh'
 import { mergeMeshes, meshBounds, translate, type MeshData } from './mesh'
 import { buildCapMesh, capProfile } from './cap'
+import { openingCutter } from './openings'
 import { buildBaseCapMesh, buildShellMesh, shellLayout, shellProfile, shellTopRadius } from './shell'
 
 // The printable parts of a shell, in place around the bottle (for the preview
@@ -150,7 +151,10 @@ export function printParts(wasm: ManifoldToplevel, config: DesignConfig, segment
       .rotate([90, 0, 0])
       .translate([0, l.topY, z]),
   )
-  let shell = cutAll([toManifold(wasm, buildShellMesh(config, segments))], capTools)[0]
+  // Openwork and windows, then the cap's magnet pockets
+  const openings = openingCutter(wasm, config)
+  let shell = cutAll([toManifold(wasm, buildShellMesh(config, segments))], [...(openings ? [openings] : []), ...capTools])[0]
+  openings?.delete()
 
   if (l.method === 'halves') {
     const [front, back] = shell.splitByPlane([0, 0, 1], 0)
@@ -191,6 +195,17 @@ export function printParts(wasm: ManifoldToplevel, config: DesignConfig, segment
   done('cap', cutAll([toManifold(wasm, buildCapMesh(config, segments))], capTools)[0])
   capTools.forEach((t) => t.delete())
   return parts
+}
+
+/** The shell with its openings cut (for the preview), or null when it has none. */
+export function cutShell(wasm: ManifoldToplevel, config: DesignConfig, segments = 96): MeshData | null {
+  const openings = openingCutter(wasm, config)
+  if (!openings) return null
+  const shell = cutAll([toManifold(wasm, buildShellMesh(config, segments))], [openings])[0]
+  openings.delete()
+  const mesh = fromManifold(shell)
+  shell.delete()
+  return mesh
 }
 
 /** Rotate about X by a multiple of 90° (exact, keeps the winding). */

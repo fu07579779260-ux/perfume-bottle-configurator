@@ -1,15 +1,15 @@
 import { ContactShadows, Environment, Lightformer, OrbitControls } from '@react-three/drei'
 import { Canvas, useThree } from '@react-three/fiber'
-import { useLayoutEffect, useMemo, useState } from 'react'
+import { useLayoutEffect, useState } from 'react'
 import { bottleTotalHeight } from '@/geometry/bottle'
 import { capLayout } from '@/geometry/cap'
-import { previewParts } from '@/geometry/parts'
 import { checkOverhang, checkWall, shellLayout, shellSize } from '@/geometry/shell'
 import { fill, useT } from '@/i18n/language'
 import { cn } from '@/lib/utils'
 import { useDesign } from '@/model/design-context'
 import { GlassBottle } from './GlassBottle'
 import { Shell } from './Shell'
+import { useShellParts } from './use-shell-parts'
 
 // Scene units are millimetres, Y up, Y = 0 at the base of the glass bottle.
 // Colours follow the ocean theme tokens.
@@ -63,7 +63,7 @@ export default function Viewport() {
   const { bottle } = config
   const [seeThrough, setSeeThrough] = useState(false)
 
-  const parts = useMemo(() => previewParts(config), [config])
+  const { parts, cutting } = useShellParts(config)
   const shell = parts[0].mesh
   const { bottomY } = shellLayout(config)
   const size = shellSize(config, shell)
@@ -155,7 +155,10 @@ export default function Viewport() {
         )}
       </dl>
       <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4">
-        <p className="text-xs text-tide">{t('viewport.hint')}</p>
+        <p className="text-xs text-tide">
+          {t('viewport.hint')}
+          {cutting && <span className="ml-2 text-lagoon">· {t('viewport.cutting')}</span>}
+        </p>
         <button
           type="button"
           aria-pressed={seeThrough}
