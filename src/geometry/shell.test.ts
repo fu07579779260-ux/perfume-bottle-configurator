@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { DEFAULT_CONFIG, type DesignConfig } from '@/model/config'
 import { designReducer } from '@/model/reducer'
 import type { MeshData } from './mesh'
-import { buildShellMesh, checkOverhang, checkWall, shellLayout, shellProfile, shellSize } from './shell'
+import { buildShellMesh, checkOverhang, checkWall, shellLayout, shellProfile, shellSize, SPIGOT_HEIGHT } from './shell'
 
 function design(patch: { [S in keyof DesignConfig]?: Partial<DesignConfig[S]> } = {}): DesignConfig {
   let c = structuredClone(DEFAULT_CONFIG)
@@ -85,13 +85,29 @@ describe('shellProfile', () => {
   })
 })
 
+/** Body width and depth at half height (below the cap seat). */
+function midSection(c: DesignConfig) {
+  const l = shellLayout(c)
+  const mid = (l.bottomY + l.topY) / 2
+  const p = buildShellMesh(c, 192).positions
+  let w = 0
+  let d = 0
+  for (let i = 0; i < p.length; i += 3) {
+    if (Math.abs(p[i + 1] - mid) > 2) continue
+    w = Math.max(w, Math.abs(p[i]))
+    d = Math.max(d, Math.abs(p[i + 2]))
+  }
+  return { width: 2 * w, depth: 2 * d }
+}
+
 describe('shellSize', () => {
   it('reports width, depth and height', () => {
     const c = design({ shape: { shoulderExtra: 20, baseExtra: 12, sectionRatio: 0.8 } })
     const s = shellSize(c)
-    expect(s.width).toBe(c.bottle.bodyDiameter + 20)
-    expect(s.depth).toBeCloseTo(s.width * 0.8)
-    expect(s.height).toBe(c.bottle.bodyHeight + c.shape.heightExtra)
+    expect(s.width).toBeCloseTo(c.bottle.bodyDiameter + 20, 1)
+    expect(s.depth).toBeCloseTo(s.width * 0.8, 1)
+    // Body plus the spigot the cap slides onto
+    expect(s.height).toBeCloseTo(c.bottle.bodyHeight + c.shape.heightExtra + SPIGOT_HEIGHT, 3)
   })
 })
 
@@ -106,7 +122,7 @@ describe('checkWall', () => {
     expect(w.minWall).toBeCloseTo(1.6)
     expect(w.ok).toBe(true)
     // 30 mm glass + 2 × (0.6 clearance + 1.6 wall)
-    expect(shellSize(c).width).toBeCloseTo(34.4, 1)
+    expect(midSection(c).width).toBeCloseTo(34.4, 1)
   })
 
   it('allows a thinner wall on resin', () => {
@@ -119,7 +135,7 @@ describe('checkWall', () => {
   it('never squashes the depth below the minimum wall', () => {
     const c = design({ shape: { sectionRatio: 0.5 } })
     expect(checkWall(c).minWall).toBeCloseTo(1.6)
-    expect(shellSize(c).depth).toBeCloseTo(c.bottle.bodyDiameter + 2 * (0.35 + 1.6), 1)
+    expect(midSection(c).depth).toBeCloseTo(c.bottle.bodyDiameter + 2 * (0.35 + 1.6), 1)
   })
 })
 

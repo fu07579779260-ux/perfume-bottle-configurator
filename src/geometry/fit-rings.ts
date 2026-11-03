@@ -1,12 +1,14 @@
 import { RANGES, type DesignConfig } from '@/model/config'
 import { TECHNOLOGY_DEFAULTS } from '@/model/options'
 import { mergeMeshes, meshBounds, revolve, translate, type MeshData } from './mesh'
+import { shellLayout } from './shell'
 
 // Fit test rings: short tubes printed in a few minutes to find the clearance
-// before printing a whole shell. One row slides over the glass body, one over
-// the pump collar (for the cap). Each row is a ladder of clearances around
-// the current value; ring 1 (lowest) is the shortest and every next ring is
-// 1 mm taller, so they can be told apart without labels.
+// before printing a whole shell. The front row slides over the glass body.
+// The back row tests the cap: a printed peg the same size as the shell's
+// spigot, and rings sized like the cap's socket. Each row is a ladder of
+// clearances around the current value; ring 1 (lowest) is the shortest and
+// every next ring is 1 mm taller, so they can be told apart without labels.
 
 export const LADDER_SIZE = 5
 export const LADDER_STEP = 0.05
@@ -68,7 +70,10 @@ function ladder(diameter: number, center: number, wall: number): FitRing[] {
 
 export interface FitTest {
   body: FitRing[]
-  collar: FitRing[]
+  /** Rings that go onto the printed spigot peg */
+  cap: FitRing[]
+  /** The peg: same size as the spigot on top of the shell */
+  peg: { innerDiameter: number; outerDiameter: number; height: number }
   mesh: MeshData
   /** Footprint on the print bed (mm) */
   bed: { width: number; depth: number }
@@ -78,9 +83,12 @@ export function fitTestRings(config: DesignConfig, segments = 128): FitTest {
   const tech = TECHNOLOGY_DEFAULTS[config.manufacturing.technology]
   const wall = Math.max(tech.minWall + 0.4, 2)
   const body = ladder(config.bottle.bodyDiameter, config.assembly.clearance, wall)
-  const collar = ladder(config.bottle.collarDiameter, config.cap.clearance, wall)
+  const sp = shellLayout(config).spigot
+  const cap = ladder(2 * sp.outer, config.cap.clearance, wall)
+  const peg = { innerDiameter: round2(2 * sp.inner), outerDiameter: round2(2 * sp.outer), height: BASE_HEIGHT + LADDER_SIZE + 2 }
+  const pegRing: FitRing = { index: 0, clearance: 0, ...peg }
 
-  // Two rows, centred on the origin: body rings in front, collar rings behind
+  // Two rows, centred on the origin: body rings in front, the peg and cap rings behind
   const row = (rings: FitRing[], z: number) => {
     const total = rings.reduce((w, r) => w + r.outerDiameter, 0) + GAP * (rings.length - 1)
     let x = -total / 2
@@ -91,9 +99,9 @@ export function fitTestRings(config: DesignConfig, segments = 128): FitTest {
     })
   }
   const bodyOuter = body[body.length - 1].outerDiameter
-  const collarOuter = collar[collar.length - 1].outerDiameter
-  const mesh = mergeMeshes([...row(body, bodyOuter / 2), ...row(collar, -(collarOuter / 2 + GAP))])
+  const capOuter = cap[cap.length - 1].outerDiameter
+  const mesh = mergeMeshes([...row(body, bodyOuter / 2), ...row([pegRing, ...cap], -(capOuter / 2 + GAP))])
   const b = meshBounds(mesh)
 
-  return { body, collar, mesh, bed: { width: b.width, depth: b.depth } }
+  return { body, cap, peg, mesh, bed: { width: b.width, depth: b.depth } }
 }

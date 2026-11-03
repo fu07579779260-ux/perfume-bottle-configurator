@@ -56,15 +56,15 @@ export function FitTestSection() {
   const { config, patch } = useDesign()
   const current = fitTestRings(config, 16)
   // Keep the ladder that was printed: picking a ring recentres the current one
-  const [printed, setPrinted] = useState<{ body: FitRing[]; collar: FitRing[]; bedSize: string } | null>(null)
-  const shown = printed ?? { body: current.body, collar: current.collar }
+  const [printed, setPrinted] = useState<{ body: FitRing[]; cap: FitRing[]; bedSize: string } | null>(null)
+  const shown = printed ?? { body: current.body, cap: current.cap }
 
   const exportRings = () => {
     const test = fitTestRings(config)
     downloadFile(toBinaryStl(test.mesh, 'Perfume bottle fit test rings'), fitRingsFileName(config), 'model/stl')
     setPrinted({
       body: test.body,
-      collar: test.collar,
+      cap: test.cap,
       bedSize: `${test.bed.width.toFixed(0)} × ${test.bed.depth.toFixed(0)} mm`,
     })
   }
@@ -96,8 +96,8 @@ export function FitTestSection() {
         onPick={(clearance) => patch('assembly', { clearance })}
       />
       <RingChoice
-        label={t('fit.bestCollar')}
-        rings={shown.collar}
+        label={t('fit.bestCap')}
+        rings={shown.cap}
         value={config.cap.clearance}
         onPick={(clearance) => patch('cap', { clearance })}
       />

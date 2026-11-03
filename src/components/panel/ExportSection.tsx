@@ -5,7 +5,7 @@ import { downloadFile } from '@/export/download'
 import { shellFileName } from '@/export/file-names'
 import { toBinaryStl } from '@/export/stl'
 import { loadManifold } from '@/geometry/manifold-loader'
-import { jointInfo, layoutForPrint, printParts } from '@/geometry/parts'
+import { capMagnetPlan, jointInfo, layoutForPrint, printParts } from '@/geometry/parts'
 import { checkWall } from '@/geometry/shell'
 import { fill, useT } from '@/i18n/language'
 import type { StringKey } from '@/i18n/strings'
@@ -22,6 +22,7 @@ export function ExportSection() {
   const [failed, setFailed] = useState(false)
   const wall = checkWall(config)
   const joint = jointInfo(config)
+  const capMagnets = capMagnetPlan(config)
   const tech = config.manufacturing.technology
   const method = config.assembly.method
 
@@ -56,7 +57,12 @@ export function ExportSection() {
   return (
     <div className="space-y-3">
       <h2 className="kicker">{t('export.title')}</h2>
-      <p className="text-xs text-tide">{partsLine}</p>
+      <p className="text-xs text-tide">
+        {partsLine}
+        {capMagnets?.fits && (
+          <> {fill(t('export.capMagnets'), { d: String(config.assembly.magnetDiameter), h: String(config.assembly.magnetHeight) })}</>
+        )}
+      </p>
       <Button onClick={() => void exportStl()} disabled={busy} className="w-full rounded-full">
         <Download aria-hidden="true" />
         {busy ? t('export.building') : t('export.stl')}

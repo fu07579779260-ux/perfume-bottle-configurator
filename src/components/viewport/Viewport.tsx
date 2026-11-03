@@ -2,6 +2,7 @@ import { ContactShadows, Environment, Lightformer, OrbitControls } from '@react-
 import { Canvas, useThree } from '@react-three/fiber'
 import { useLayoutEffect, useMemo, useState } from 'react'
 import { bottleTotalHeight } from '@/geometry/bottle'
+import { capLayout } from '@/geometry/cap'
 import { previewParts } from '@/geometry/parts'
 import { checkOverhang, checkWall, shellLayout, shellSize } from '@/geometry/shell'
 import { fill, useT } from '@/i18n/language'
@@ -70,7 +71,7 @@ export default function Viewport() {
   const overhang = checkOverhang(config)
 
   // Frame the glass bottle with its pump; the shell's own edits don't move the camera
-  const height = bottleTotalHeight(bottle)
+  const height = Math.max(bottleTotalHeight(bottle), capLayout(config).topY)
   const distance = height * DISTANCE_PER_MM
   const targetY = height * 0.46
   const homeKey = `${bottle.bodyDiameter}:${height}`
@@ -94,7 +95,7 @@ export default function Viewport() {
           <Shell
             key={part.id}
             mesh={part.mesh}
-            colour={config.personal.shellColour}
+            colour={part.id === 'cap' ? config.personal.capColour : config.personal.shellColour}
             finish={config.personal.finish}
             seeThrough={seeThrough}
           />

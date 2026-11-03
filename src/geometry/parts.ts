@@ -1,13 +1,14 @@
-import type { ManifoldToplevel } from 'manifold-3d'
+import type { Manifold, ManifoldToplevel } from 'manifold-3d'
 import type { DesignConfig } from '@/model/config'
 import { fromManifold, toManifold } from './manifold-mesh'
 import { mergeMeshes, meshBounds, translate, type MeshData } from './mesh'
-import { buildBaseCapMesh, buildShellMesh, shellLayout, shellProfile } from './shell'
+import { buildCapMesh, capProfile } from './cap'
+import { buildBaseCapMesh, buildShellMesh, shellLayout, shellProfile, shellTopRadius } from './shell'
 
 // The printable parts of a shell, in place around the bottle (for the preview
 // and for checks) and laid out on the print bed (for export).
 
-export type PartId = 'shell' | 'base' | 'front' | 'back' | 'dowel'
+export type PartId = 'shell' | 'base' | 'front' | 'back' | 'dowel' | 'cap'
 
 export interface Part {
   id: PartId
@@ -37,7 +38,38 @@ export function previewParts(config: DesignConfig, segments = 96): Part[] {
   const parts: Part[] = [{ id: 'shell', mesh: buildShellMesh(config, segments) }]
   const base = buildBaseCapMesh(config, segments)
   if (base) parts.push({ id: 'base', mesh: base })
+  parts.push({ id: 'cap', mesh: buildCapMesh(config, segments) })
   return parts
+}
+
+/**
+ * Magnets that hold the cap: one pair on each side, in the seat ring between
+ * the spigot and the outside (placed front and back, so a two-part shell
+ * keeps each pocket whole). Null when the cap isn't held by magnets.
+ */
+export function capMagnetPlan(config: DesignConfig): { spots: number[]; radius: number; depth: number; fits: boolean } | null {
+  if (config.cap.fit !== 'magnet') return null
+  const l = shellLayout(config)
+  const capBase = capProfile(config).find((q) => q.side === 'outer')?.r ?? 0
+  const inner = l.spigot.outer + 0.3
+  const outer = Math.min(shellTopRadius(l), capBase)
+  const d = config.assembly.magnetDiameter
+  const fits = outer - inner >= d + 2 * HOLE_WALL
+  const mid = (inner + outer) / 2
+  return { spots: fits ? [mid, -mid] : [], radius: d / 2 + 0.15, depth: config.assembly.magnetHeight + 0.2, fits }
+}
+
+/** Cut the same tools out of several solids; deletes the inputs and the tools. */
+function cutAll(solids: Manifold[], tools: Manifold[]): Manifold[] {
+  return solids.map((solid) => {
+    let current = solid
+    for (const tool of tools) {
+      const next = current.subtract(tool)
+      current.delete()
+      current = next
+    }
+    return current
+  })
 }
 
 /** Side-wall thickness along the X axis (where the halves meet) at height y. */
@@ -106,57 +138,58 @@ export function printParts(wasm: ManifoldToplevel, config: DesignConfig, segment
   const l = shellLayout(config)
   const holeClear = config.manufacturing.technology === 'fdm' ? 0.15 : 0.1
   const parts: Part[] = []
+  const done = (id: PartId, m: Manifold) => {
+    parts.push({ id, mesh: fromManifold(m) })
+    m.delete()
+  }
+
+  // Magnet pockets for the cap go through the seat into both the shell and the cap
+  const capMagnets = capMagnetPlan(config)
+  const capTools = (capMagnets?.spots ?? []).map((z) =>
+    wasm.Manifold.cylinder(2 * capMagnets!.depth, capMagnets!.radius, capMagnets!.radius, 32, true)
+      .rotate([90, 0, 0])
+      .translate([0, l.topY, z]),
+  )
+  let shell = cutAll([toManifold(wasm, buildShellMesh(config, segments))], capTools)[0]
 
   if (l.method === 'halves') {
-    const whole = toManifold(wasm, buildShellMesh(config, segments))
-    const [front, back] = whole.splitByPlane([0, 0, 1], 0)
-    whole.delete()
+    const [front, back] = shell.splitByPlane([0, 0, 1], 0)
+    shell.delete()
     const plan = jointPlan(config)
-    let cutFront = front
-    let cutBack = back
-    for (const [x, y] of plan.spots) {
+    const tools = plan.spots.map(([x, y]) => {
       const radius = plan.magnets ? plan.size / 2 + 0.15 : plan.size / 2 + holeClear
       const depth = plan.magnets ? config.assembly.magnetHeight + 0.2 : DOWEL_HOLE
-      const tool = wasm.Manifold.cylinder(2 * depth, radius, radius, 32, true).translate([x, y, 0])
-      const f = cutFront.subtract(tool)
-      const b = cutBack.subtract(tool)
-      cutFront.delete()
-      cutBack.delete()
-      tool.delete()
-      cutFront = f
-      cutBack = b
-    }
-    parts.push({ id: 'front', mesh: fromManifold(cutFront) }, { id: 'back', mesh: fromManifold(cutBack) })
-    cutFront.delete()
-    cutBack.delete()
-
+      return wasm.Manifold.cylinder(2 * depth, radius, radius, 32, true).translate([x, y, 0])
+    })
+    const [cutFront, cutBack] = cutAll([front, back], tools)
+    tools.forEach((t) => t.delete())
+    done('front', cutFront)
+    done('back', cutBack)
     if (!plan.magnets) {
       for (const [x, y] of plan.spots) {
         const r = plan.size / 2
-        const dowel = wasm.Manifold.cylinder(2 * DOWEL_HOLE - 0.6, r, r, 24, true).translate([x, y, 0])
-        parts.push({ id: 'dowel', mesh: fromManifold(dowel) })
-        dowel.delete()
+        done('dowel', wasm.Manifold.cylinder(2 * DOWEL_HOLE - 0.6, r, r, 24, true).translate([x, y, 0]))
       }
     }
-    return parts
+  } else {
+    done('shell', shell)
+    shell = undefined as never
   }
 
-  parts.push({ id: 'shell', mesh: buildShellMesh(config, segments) })
   const base = buildBaseCapMesh(config, segments)
   if (base && l.baseFit) {
     if (l.baseFit.kind === 'thread') {
-      // A coin slot underneath, to screw the cap in and out
-      const plug = toManifold(wasm, base)
+      // A coin slot underneath, to screw the base cap in and out
       const slot = wasm.Manifold.cube([16, 3, 1.4], true).translate([0, l.baseFit.bottomY, 0])
-      const slotted = plug.subtract(slot)
-      parts.push({ id: 'base', mesh: fromManifold(slotted) })
-      plug.delete()
+      done('base', cutAll([toManifold(wasm, base)], [slot])[0])
       slot.delete()
-      slotted.delete()
     } else {
       parts.push({ id: 'base', mesh: base })
     }
   }
+
+  done('cap', cutAll([toManifold(wasm, buildCapMesh(config, segments))], capTools)[0])
+  capTools.forEach((t) => t.delete())
   return parts
 }
 
@@ -184,6 +217,8 @@ const PRINT_TURN: Record<PartId, number> = {
   back: 1,
   // Stand the pins upright
   dowel: 3,
+  // Upright on its flat underside; the 45° roofs inside need no supports
+  cap: 0,
 }
 
 /** All parts in one mesh, each turned into its print orientation and spaced out on the bed. */

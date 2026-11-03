@@ -3,6 +3,7 @@ import { DEFAULT_CONFIG } from '@/model/config'
 import { designReducer } from '@/model/reducer'
 import { clearanceLadder, fitTestRings } from './fit-rings'
 import { meshBounds, type MeshData } from './mesh'
+import { shellLayout } from './shell'
 
 function volume({ positions: p, indices: ix }: MeshData) {
   let v = 0
@@ -30,20 +31,23 @@ describe('clearanceLadder', () => {
 describe('fitTestRings', () => {
   const test = fitTestRings(DEFAULT_CONFIG, 48)
 
-  it('sizes the body rings from the glass and the collar rings from the pump', () => {
-    const d = DEFAULT_CONFIG.bottle
+  it('sizes the body rings from the glass, and the cap rings and peg from the spigot', () => {
+    const sp = shellLayout(DEFAULT_CONFIG).spigot
     expect(test.body.map((r) => r.innerDiameter)).toEqual([30.5, 30.6, 30.7, 30.8, 30.9])
-    expect(test.collar[0].innerDiameter).toBeCloseTo(d.collarDiameter + 2 * test.collar[0].clearance)
+    expect(test.peg.outerDiameter).toBeCloseTo(2 * sp.outer)
+    expect(test.cap[0].innerDiameter).toBeCloseTo(2 * sp.outer + 2 * test.cap[0].clearance)
   })
 
   it('makes every ring 1 mm taller than the one before', () => {
     expect(test.body.map((r) => r.height)).toEqual([6, 7, 8, 9, 10])
   })
 
-  it('builds ten separate solids that face outwards and sit on the bed', () => {
+  it('builds eleven separate solids that face outwards and sit on the bed', () => {
     expect(volume(test.mesh)).toBeGreaterThan(0)
     expect(meshBounds(test.mesh).min[1]).toBe(0)
-    expect(meshBounds(test.mesh).height).toBe(10)
+    // The peg is taller than the tallest ring, so a ring can slide all the way on
+    expect(meshBounds(test.mesh).height).toBe(test.peg.height)
+    expect(test.peg.height).toBeGreaterThan(10)
   })
 
   it('uses thicker rings for FDM than the bare minimum wall', () => {
@@ -51,8 +55,8 @@ describe('fitTestRings', () => {
     expect((r.outerDiameter - r.innerDiameter) / 2).toBe(2)
   })
 
-  it('follows the cap clearance for the collar row', () => {
+  it('follows the cap clearance for the cap row', () => {
     const c = designReducer(structuredClone(DEFAULT_CONFIG), { type: 'patch', section: 'cap', values: { clearance: 0.5 } })
-    expect(fitTestRings(c, 16).collar.map((r) => r.clearance)).toEqual([0.4, 0.45, 0.5, 0.55, 0.6])
+    expect(fitTestRings(c, 16).cap.map((r) => r.clearance)).toEqual([0.4, 0.45, 0.5, 0.55, 0.6])
   })
 })

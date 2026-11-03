@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { AssemblySection } from '@/components/panel/AssemblySection'
+import { CapSection } from '@/components/panel/CapSection'
 import { ParamSlider } from '@/components/panel/controls'
 import { ExportSection } from '@/components/panel/ExportSection'
 import { FitTestSection } from '@/components/panel/FitTestSection'
@@ -70,6 +71,8 @@ function BottlePanel() {
       </div>
 
       <AssemblySection />
+
+      <CapSection />
 
       <div className="space-y-3">
         <h2 className="kicker">{t('panel.fit')}</h2>

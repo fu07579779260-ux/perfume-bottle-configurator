@@ -76,7 +76,7 @@ describe('bottom-loaded shell', () => {
 
   it('cuts a coin slot into a screw-in base cap', () => {
     const parts = printParts(wasm, c, 64)
-    expect(parts.map((p) => p.id)).toEqual(['shell', 'base'])
+    expect(parts.map((p) => p.id)).toEqual(['shell', 'base', 'cap'])
     const slotted = solidVolume(parts[1].mesh)
     expect(slotted).toBeLessThan(solidVolume(buildBaseCapMesh(c, 64)!))
   })
@@ -150,6 +150,6 @@ describe('layoutForPrint', () => {
   })
 
   it('previews a bottom-loaded shell with its base cap', () => {
-    expect(previewParts(design({ shape: { silhouette: 'pebble' } })).map((p) => p.id)).toEqual(['shell', 'base'])
+    expect(previewParts(design({ shape: { silhouette: 'pebble' } })).map((p) => p.id)).toEqual(['shell', 'base', 'cap'])
   })
 })
