@@ -1,5 +1,6 @@
 import type { DesignConfig } from '@/model/config'
 import { TECHNOLOGY_DEFAULTS } from '@/model/options'
+import { revolve, type MeshData } from './mesh'
 
 // The printed shell as a closed side profile swept around the Y axis.
 // Y = 0 is the base of the glass bottle (= the top of the shell floor).
@@ -143,49 +144,9 @@ export function shellSize(config: DesignConfig): ShellSize {
   }
 }
 
-export interface MeshData {
-  positions: Float32Array
-  indices: Uint32Array
-}
-
-/**
- * Sweep the profile around Y into a closed, watertight triangle mesh with
- * outward-facing triangles. The two axis points become single vertices.
- */
+/** Sweep the profile around Y into a closed, watertight cup with outward-facing triangles. */
 export function buildShellMesh(config: DesignConfig, segments = 96): MeshData {
   const l = shellLayout(config)
-  const profile = shellProfile(config)
-  const rings = profile.slice(1, -1)
-  const positions: number[] = []
-  const indices: number[] = []
-
   const depthAt = (r: number) => (r <= l.cavityRadius ? r : l.cavityRadius + (r - l.cavityRadius) * l.depthFactor)
-
-  positions.push(0, profile[0].y, 0) // 0: bottom centre
-  for (const p of rings) {
-    const d = depthAt(p.r)
-    for (let s = 0; s < segments; s++) {
-      const a = (s / segments) * Math.PI * 2
-      positions.push(Math.cos(a) * p.r, p.y, Math.sin(a) * d)
-    }
-  }
-  const top = positions.length / 3
-  positions.push(0, profile[profile.length - 1].y, 0) // floor centre
-
-  const ring = (i: number, s: number) => 1 + i * segments + (s % segments)
-
-  for (let s = 0; s < segments; s++) indices.push(0, ring(0, s), ring(0, s + 1))
-  for (let i = 0; i < rings.length - 1; i++) {
-    for (let s = 0; s < segments; s++) {
-      const a = ring(i, s)
-      const b = ring(i, s + 1)
-      const c = ring(i + 1, s)
-      const d = ring(i + 1, s + 1)
-      indices.push(a, c, b, b, c, d)
-    }
-  }
-  const last = rings.length - 1
-  for (let s = 0; s < segments; s++) indices.push(top, ring(last, s + 1), ring(last, s))
-
-  return { positions: new Float32Array(positions), indices: new Uint32Array(indices) }
+  return revolve(shellProfile(config), segments, depthAt)
 }

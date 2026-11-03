@@ -1,4 +1,4 @@
-import type { MeshData } from '@/geometry/shell'
+import type { MeshData } from '@/geometry/mesh'
 
 const HEADER_BYTES = 80
 const TRIANGLE_BYTES = 50

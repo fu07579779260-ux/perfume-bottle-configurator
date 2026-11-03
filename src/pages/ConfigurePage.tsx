@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { ParamSlider } from '@/components/panel/controls'
 import { ExportSection } from '@/components/panel/ExportSection'
+import { FitTestSection } from '@/components/panel/FitTestSection'
 import { ViewportErrorBoundary } from '@/components/viewport/ViewportErrorBoundary'
 import { useT } from '@/i18n/language'
 import { cn } from '@/lib/utils'
@@ -85,6 +86,8 @@ function BottlePanel() {
           ))}
         </div>
       </div>
+
+      <FitTestSection />
 
       <ExportSection />
 

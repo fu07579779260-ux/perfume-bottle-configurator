@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import { BufferAttribute, BufferGeometry } from 'three'
 import { toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
-import type { MeshData } from '@/geometry/shell'
+import type { MeshData } from '@/geometry/mesh'
 import type { Finish } from '@/model/options'
 
 /** Normals stay smooth across gentle curves but break at the rim and the floor. */

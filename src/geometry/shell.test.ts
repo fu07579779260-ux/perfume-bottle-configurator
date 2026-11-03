@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { DEFAULT_CONFIG, type DesignConfig } from '@/model/config'
 import { designReducer } from '@/model/reducer'
-import { buildShellMesh, checkWall, shellLayout, shellProfile, shellSize, type MeshData } from './shell'
+import type { MeshData } from './mesh'
+import { buildShellMesh, checkWall, shellLayout, shellProfile, shellSize } from './shell'
 
 function design(patch: { [S in keyof DesignConfig]?: Partial<DesignConfig[S]> } = {}): DesignConfig {
   let c = structuredClone(DEFAULT_CONFIG)
