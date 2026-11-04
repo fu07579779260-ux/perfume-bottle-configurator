@@ -76,9 +76,8 @@ function offsetOf(config: DesignConfig, type: Texture, span: TextureSpan, y: num
 export function textureOffset(config: DesignConfig, span: TextureSpan, y: number, a: number, r: number): number {
   if (y <= span.from || y >= span.to) return 0
   const fade = smoothstep((y - span.from) / FADE) * smoothstep((span.to - y) / FADE)
-  // The coral carries its own grooves; only the advanced mode adds a texture over them
+  // Added textures combine with the coral's inherent grooves in both editing modes.
   const coral = config.shape.silhouette === 'coral' ? coralGroove(config, span, y, a) : 0
-  if (coral && !config.mode.advanced) return fade * coral
   const { type, zone, upperType } = config.texture
   if (zone === 'whole') return fade * (coral + offsetOf(config, type, span, y, a, r))
   // Lower part only, or two bands that cross-fade over 2 mm at the split

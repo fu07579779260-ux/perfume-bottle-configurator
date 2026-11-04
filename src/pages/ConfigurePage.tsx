@@ -6,7 +6,7 @@ import { ParamSlider } from '@/components/panel/controls'
 import { ExportSection } from '@/components/panel/ExportSection'
 import { FeedbackSection } from '@/components/panel/FeedbackSection'
 import { FitTestSection } from '@/components/panel/FitTestSection'
-import { PersonalSection, StylePicker } from '@/components/panel/PersonalSection'
+import { AppearanceSection, PersonalSection, StylePicker } from '@/components/panel/PersonalSection'
 import { ProfileEditor } from '@/components/panel/ProfileEditor'
 import { PrintSection } from '@/components/panel/PrintSection'
 import { ShareSection } from '@/components/panel/ShareSection'
@@ -174,6 +174,29 @@ function AssemblyOptions() {
   )
 }
 
+function SurfaceOptions({ onTabChange }: { onTabChange: () => void }) {
+  const t = useT()
+  const [tab, setTab] = useState<'materials' | 'texture' | 'marks'>('materials')
+  const tabs = ['materials', 'texture', 'marks'] as const
+
+  return (
+    <div className="space-y-5">
+      <div role="group" aria-label={t('surface.nav')} className="-mx-5 -mt-5 flex gap-1.5 border-b border-rule/70 bg-surface px-5 py-3 lg:sticky lg:-top-5 lg:z-10">
+        {tabs.map((item) => (
+          <button key={item} id={`surface-button-${item}`} type="button" aria-pressed={tab === item} aria-controls={`surface-panel-${item}`}
+            onClick={() => { setTab(item); onTabChange() }}
+            className={cn('min-h-10 min-w-0 flex-1 rounded-lg px-2 py-2 text-xs font-medium transition-colors', tab === item ? 'bg-gold text-canvas' : 'bg-canvas text-muted hover:bg-soft hover:text-ink')}>
+            {t(`surface.${item}`)}
+          </button>
+        ))}
+      </div>
+      <section id="surface-panel-materials" aria-labelledby="surface-button-materials" hidden={tab !== 'materials'}><AppearanceSection /></section>
+      <section id="surface-panel-texture" aria-labelledby="surface-button-texture" hidden={tab !== 'texture'}><TextureSection /></section>
+      <section id="surface-panel-marks" aria-labelledby="surface-button-marks" hidden={tab !== 'marks'}><PersonalSection /></section>
+    </div>
+  )
+}
+
 export function ConfigurePage() {
   const t = useT()
   const [active, setActive] = useState(0)
@@ -206,7 +229,7 @@ export function ConfigurePage() {
   const panels: Record<StepId, ReactNode> = {
     bottle: <BottleOptions />,
     shape: <ShapeOptions />,
-    surface: <><TextureSection /><PersonalSection /></>,
+    surface: <SurfaceOptions onTabChange={() => contentRef.current?.scrollTo({ top: 0 })} />,
     assembly: <AssemblyOptions />,
     print: <>
       <PrintSection />

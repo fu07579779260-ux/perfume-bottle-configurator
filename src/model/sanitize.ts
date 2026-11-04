@@ -11,7 +11,6 @@ import {
   type Section,
 } from './config'
 import {
-  ALLOWED_TEXTURES,
   ASSEMBLY_METHODS,
   BASE_FIXINGS,
   BOTTLE_DIMENSIONS,
@@ -156,11 +155,9 @@ export function sanitizeConfig(input: unknown): DesignConfig {
     if (!matches) b.preset = 'custom'
   }
 
-  // Outside the advanced mode: only the textures that suit the silhouette, on the whole shell
+  // Basic mode uses the whole shell; every texture remains available for every silhouette.
   const t = config.texture
   if (!config.mode.advanced) {
-    const allowed = ALLOWED_TEXTURES[config.shape.silhouette]
-    if (!allowed.includes(t.type)) t.type = 'smooth'
     t.zone = 'whole'
   }
 

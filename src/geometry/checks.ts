@@ -1,5 +1,5 @@
 import type { DesignConfig } from '@/model/config'
-import { ALLOWED_TEXTURES, PRINTER_BEDS, TECHNOLOGY_DEFAULTS } from '@/model/options'
+import { RECOMMENDED_TEXTURES, PRINTER_BEDS, TECHNOLOGY_DEFAULTS } from '@/model/options'
 import { capLayout } from './cap'
 import { meshBounds } from './mesh'
 import { shellOpenings } from './openings'
@@ -102,7 +102,7 @@ export function designChecks(config: DesignConfig): Check[] {
   }
   const t = config.texture
   const used = t.zone === 'bands' ? [t.type, t.upperType] : [t.type]
-  if (config.mode.advanced && used.some((x) => !ALLOWED_TEXTURES[config.shape.silhouette].includes(x))) {
+  if (used.some((x) => !RECOMMENDED_TEXTURES[config.shape.silhouette].includes(x))) {
     checks.push({ id: 'freeCombo', level: 'note', values: {} })
   }
   return checks

@@ -4,6 +4,7 @@ import { fill, useT } from '@/i18n/language'
 import { cn } from '@/lib/utils'
 import { MAX_TEXT_LINE_LENGTH, RANGES } from '@/model/config'
 import { useDesign } from '@/model/design-context'
+import { applyMaterialPreset, MATERIAL_PRESETS } from '@/model/material-presets'
 import { designCode } from '@/model/design-number'
 import { FINISHES, LOGO_POSITIONS, TEXT_MODES, TEXT_POSITIONS } from '@/model/options'
 import { applyStyle, STYLES } from '@/model/styles'
@@ -243,14 +244,61 @@ export function PersonalSection() {
         </span>
       </label>
 
+    </div>
+  )
+}
+
+const FINISH_SWATCH = {
+  matte: 'radial-gradient(circle at 32% 24%, #f2e9db, #afa89c 65%, #666057)',
+  silk: 'radial-gradient(ellipse at 30% 18%, #fff 0%, #fff 5%, #a6c7c2 16%, #357b75 55%, #183c39 90%)',
+  translucent: 'radial-gradient(circle at 28% 20%, #fff9 0%, #f6d88d88 22%, #b6732f66 62%, #f4d694aa 90%)',
+  metallic: 'linear-gradient(115deg, #574026, #e2c38a 24%, #fff6db 34%, #6c4c24 49%, #e9cc90 69%, #604727)',
+}
+
+export function AppearanceSection() {
+  const t = useT()
+  const { config, patch, load } = useDesign()
+  const p = config.personal
+  const m = config.manufacturing
+
+  return (
+    <div className="space-y-6">
+      <fieldset>
+        <legend className="kicker">{t('surface.materials.title')}</legend>
+        <div role="group" aria-label={t('surface.materials.title')} className="mt-3 grid grid-cols-2 gap-2">
+          {MATERIAL_PRESETS.map((preset) => {
+            const selected = m.technology === preset.technology && m.material === preset.material
+            return (
+              <button key={preset.id} type="button" aria-pressed={selected} onClick={() => load(applyMaterialPreset(config, preset.id))}
+                className={cn('flex items-center gap-2.5 rounded-xl px-3 py-3 text-left transition-colors last:col-span-2', selected ? 'bg-soft ring-2 ring-gold' : 'bg-canvas ring-1 ring-rule hover:bg-soft')}>
+                <span aria-hidden="true" className="size-7 shrink-0 rounded-full ring-1 ring-white/15" style={{ background: FINISH_SWATCH[preset.finish], opacity: preset.id === 'pa12' ? 0.75 : 1 }} />
+                <span>
+                  <span className="block text-sm font-medium text-ink">{t(`material.${preset.material}`)}</span>
+                  <span className="mt-0.5 block text-[0.65rem] leading-relaxed text-muted">{t(`surface.preset.${preset.id}`)}</span>
+                </span>
+              </button>
+            )
+          })}
+        </div>
+        <p className="mt-3 text-xs leading-relaxed text-muted">{t('surface.materials.note')}</p>
+      </fieldset>
+
+      <fieldset>
+        <legend className="kicker">{t('personal.finish')}</legend>
+        <div role="group" aria-label={t('personal.finish')} className="mt-3 grid grid-cols-2 gap-2">
+          {FINISHES.map((finish) => (
+            <button key={finish} type="button" aria-pressed={p.finish === finish} onClick={() => patch('personal', { finish })}
+              className={cn('flex items-center gap-2.5 rounded-xl px-3 py-3 text-left transition-colors', p.finish === finish ? 'bg-soft ring-2 ring-gold' : 'bg-canvas ring-1 ring-rule hover:bg-soft')}>
+              <span aria-hidden="true" className="size-8 shrink-0 rounded-full ring-1 ring-white/15" style={{ background: FINISH_SWATCH[finish] }} />
+              <span className="text-xs font-medium text-ink">{t(`finish.${finish}`)}</span>
+            </button>
+          ))}
+        </div>
+        <p className="mt-3 text-xs leading-relaxed text-muted">{p.finish === 'metallic' ? t('surface.metalNote') : t('surface.finishNote')}</p>
+      </fieldset>
+
       <ColourPicker label={t('personal.shellColour')} value={p.shellColour} colours={SWATCHES} onChange={(shellColour) => patch('personal', { shellColour })} />
       <ColourPicker label={t('personal.capColour')} value={p.capColour} colours={SWATCHES} onChange={(capColour) => patch('personal', { capColour })} />
-      <Pills
-        label={t('personal.finish')}
-        value={p.finish}
-        options={FINISHES.map((v) => ({ value: v, label: t(`finish.${v}`) }))}
-        onChange={(finish) => patch('personal', { finish })}
-      />
       <ColourPicker label={t('panel.liquid')} value={p.liquidColour} colours={LIQUIDS} onChange={(liquidColour) => patch('personal', { liquidColour })} />
     </div>
   )

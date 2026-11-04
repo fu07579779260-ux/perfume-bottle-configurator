@@ -42,10 +42,10 @@ describe('designReducer', () => {
     expect(next.manufacturing.printer).toBe('generic')
   })
 
-  it('resets a texture that does not suit the new silhouette', () => {
+  it('keeps the chosen texture when switching to a structured silhouette', () => {
     let s = designReducer(start(), { type: 'patch', section: 'texture', values: { type: 'fluted' } })
     s = designReducer(s, { type: 'patch', section: 'shape', values: { silhouette: 'coral' } })
-    expect(s.texture.type).toBe('smooth')
+    expect(s.texture.type).toBe('fluted')
   })
 
   it('loads and resets', () => {

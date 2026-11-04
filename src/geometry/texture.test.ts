@@ -63,6 +63,15 @@ describe('textures', () => {
     expect(textureOffset(c, span, span.to, 0, 20)).toBe(0)
   })
 
+  it('adds a visible wave to coral grooves in basic mode', () => {
+    const smooth = design({ shape: { silhouette: 'coral' } })
+    const waves = design({ shape: { silhouette: 'coral' }, texture: { type: 'waves' } })
+    expect(waves.mode.advanced).toBe(false)
+    const span = shellLayout(waves).texture
+    const y = span.from + waves.texture.waveLength * 1.25
+    expect(textureOffset(waves, span, y, 0, span.radius)).not.toBeCloseTo(textureOffset(smooth, span, y, 0, span.radius), 3)
+  })
+
   it('only textures the lower part when the zone says so', () => {
     const c = design({ mode: { advanced: true }, texture: { type: 'waves', zone: 'lower', zoneSplit: 50 } })
     const span = shellLayout(c).texture

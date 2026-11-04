@@ -4,6 +4,7 @@ import { DEFAULT_CONFIG, type DesignConfig } from '@/model/config'
 import { designReducer } from '@/model/reducer'
 import { toManifold } from './manifold-mesh'
 import { frameLayout, hasOpenings, shellOpenings } from './openings'
+import { RECOMMENDED_TEXTURES, SILHOUETTES, TEXTURES } from '@/model/options'
 import { cutShell, jointInfo, printParts } from './parts'
 import { buildShellMesh, shellLayout } from './shell'
 
@@ -27,6 +28,22 @@ function solid(mesh: { positions: Float32Array; indices: Uint32Array }) {
   m.delete()
   return out
 }
+
+describe('texture combinations in basic mode', () => {
+  const combinations = SILHOUETTES.flatMap((silhouette) => TEXTURES
+    .filter((texture) => !RECOMMENDED_TEXTURES[silhouette].includes(texture))
+    .map((texture) => ({ silhouette, texture })))
+
+  it.each(combinations)('$silhouette with $texture exports a valid solid without advanced mode', ({ silhouette, texture }) => {
+    const c = design({ shape: { silhouette }, texture: { type: texture } })
+    expect(c.mode.advanced).toBe(false)
+    expect(c.texture.type).toBe(texture)
+    const mesh = cutShell(wasm, c, 48) ?? buildShellMesh(c, 48)
+    const result = solid(mesh)
+    expect(result.status).toBe('NoError')
+    expect(result.volume).toBeGreaterThan(0)
+  })
+})
 
 describe('cellular openwork', () => {
   const c = design({ texture: { type: 'cellular', cellSize: 12, cellRim: 2.5 } })

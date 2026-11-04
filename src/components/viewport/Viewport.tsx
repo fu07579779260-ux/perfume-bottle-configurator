@@ -6,6 +6,7 @@ import { bottleTotalHeight } from '@/geometry/bottle'
 import { capLayout } from '@/geometry/cap'
 import { checkOverhang, checkWall, shellLayout, shellSize } from '@/geometry/shell'
 import { fill, useT } from '@/i18n/language'
+import type { StringKey } from '@/i18n/strings'
 import { cn } from '@/lib/utils'
 import { useDesign } from '@/model/design-context'
 import { CaptureRegistrar } from './CaptureRegistrar'
@@ -150,6 +151,7 @@ export default function Viewport() {
             mesh={part.mesh}
             colour={part.id === 'cap' ? config.personal.capColour : config.personal.shellColour}
             finish={config.personal.finish}
+            material={config.manufacturing.material}
             seeThrough={seeThrough}
           />
         ))}
@@ -184,6 +186,10 @@ export default function Viewport() {
         role="status"
         className="pointer-events-none absolute bottom-3 left-3 max-w-[calc(100%-1.5rem)] space-y-1 rounded-lg bg-surface/85 px-3 py-2 text-xs tabular-nums backdrop-blur-sm"
       >
+        <div className="flex flex-wrap gap-x-2">
+          <dt className="text-muted">{t('viewport.material')}</dt>
+          <dd className="text-ink">{t(`material.${config.manufacturing.material}` as StringKey)} · {t(`finish.${config.personal.finish}`)}</dd>
+        </div>
         <div className="flex flex-wrap gap-x-2">
           <dt className="text-muted">{t('viewport.shell')}</dt>
           <dd className="text-ink">

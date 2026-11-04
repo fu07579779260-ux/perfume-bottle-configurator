@@ -3,7 +3,7 @@ import { fill, useT } from '@/i18n/language'
 import { cn } from '@/lib/utils'
 import { RANGES, type TextureConfig } from '@/model/config'
 import { useDesign } from '@/model/design-context'
-import { ALLOWED_TEXTURES, TEXTURE_ZONES, TEXTURES, WAVE_DIRECTIONS, WINDOW_SHAPES, type Texture } from '@/model/options'
+import { RECOMMENDED_TEXTURES, TEXTURE_ZONES, TEXTURES, WAVE_DIRECTIONS, WINDOW_SHAPES, type Texture } from '@/model/options'
 import { ParamSlider } from './controls'
 
 type TextureSlider = 'fluteCount' | 'fluteDepth' | 'facetCount' | 'waveLength' | 'waveAmplitude' | 'cellSize' | 'cellRim'
@@ -18,30 +18,33 @@ export function TextureSection() {
   const t = useT()
   const { config, patch } = useDesign()
   const tex = config.texture
-  // Outside the advanced mode, only the textures that suit the silhouette
-  const allowed = config.mode.advanced ? TEXTURES : ALLOWED_TEXTURES[config.shape.silhouette]
+  const recommended = RECOMMENDED_TEXTURES[config.shape.silhouette]
   const openings = shellOpenings(config)
 
   return (
     <div className="space-y-3">
       <h2 className="kicker">{t('panel.texture')}</h2>
-      <div role="group" aria-label={t('panel.texture')} className="flex flex-wrap gap-1.5">
-        {TEXTURES.filter((v) => allowed.includes(v)).map((v) => (
+      <p className="text-xs leading-relaxed text-muted">{t('texture.intro')}</p>
+      <div role="group" aria-label={t('panel.texture')} className="grid grid-cols-2 gap-2">
+        {TEXTURES.map((v) => (
           <button
             key={v}
             type="button"
             aria-pressed={tex.type === v}
             onClick={() => patch('texture', { type: v })}
             className={cn(
-              'rounded-full px-3.5 py-1 text-sm transition-colors',
+              'rounded-xl px-3 py-3 text-left text-sm transition-colors last:col-span-2',
               tex.type === v ? 'bg-gold text-canvas' : 'bg-soft/70 text-ink hover:bg-soft',
             )}
           >
-            {t(`texture.${v}`)}
+            <span className="block font-medium">{t(`texture.${v}`)}</span>
+            <span className={cn('mt-1 block text-[0.65rem]', tex.type === v ? 'text-canvas/75' : 'text-muted')}>
+              {recommended.includes(v) ? t('texture.recommended') : t('texture.freeChoice')}
+            </span>
           </button>
         ))}
       </div>
-      {allowed.length === 1 && <p className="text-xs text-muted">{t('texture.ownStructure')}</p>}
+      <p className="text-xs leading-relaxed text-muted">{t('texture.geometryNote')}</p>
 
       {config.mode.advanced && (
         <div className="space-y-2 rounded-lg bg-canvas p-3">

@@ -39,9 +39,9 @@ describe('sanitizeConfig', () => {
     expect(sanitizeConfig({ bottle: { preset: '30ml' } }).bottle.preset).toBe('30ml')
   })
 
-  it('only allows suitable textures outside the advanced mode', () => {
+  it('keeps texture choices in basic mode while reserving bands for advanced mode', () => {
     const basic = sanitizeConfig({ shape: { silhouette: 'coral' }, texture: { type: 'fluted', zone: 'bands' } })
-    expect(basic.texture.type).toBe('smooth')
+    expect(basic.texture.type).toBe('fluted')
     expect(basic.texture.zone).toBe('whole')
 
     const advanced = sanitizeConfig({

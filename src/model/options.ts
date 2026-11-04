@@ -81,8 +81,8 @@ export const SILHOUETTE_STARTS: Record<Silhouette, { sectionRatio?: number; base
 export const TEXTURES = ['smooth', 'fluted', 'facets', 'waves', 'cellular'] as const
 export type Texture = (typeof TEXTURES)[number]
 
-/** Textures offered per silhouette outside the advanced mode (PLAN.md §4.4). */
-export const ALLOWED_TEXTURES: Record<Silhouette, readonly Texture[]> = {
+/** Suggested combinations, rather than a restriction on what the user can choose. */
+export const RECOMMENDED_TEXTURES: Record<Silhouette, readonly Texture[]> = {
   column: TEXTURES,
   teardrop: TEXTURES,
   prism: ['smooth', 'fluted', 'waves'],
