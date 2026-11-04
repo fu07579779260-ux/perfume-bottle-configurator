@@ -3,8 +3,15 @@ import { SilhouetteSketch } from '@/components/layout/SilhouetteSketch'
 import { useT } from '@/i18n/language'
 import type { StringKey } from '@/i18n/strings'
 import { href } from '@/lib/router'
+import { DEFAULT_CONFIG } from '@/model/config'
+import { useDesign } from '@/model/design-context'
 import { SILHOUETTES } from '@/model/options'
-import { PagePlaceholder } from './placeholder'
+import { applyStyle, STYLES, type Style } from '@/model/styles'
+import { openDesign } from '@/persistence/working'
+import { logoStore } from '@/personal/logo-store'
+
+/** Example designs: each style applied to the default bottle */
+const EXAMPLES = STYLES.map((style) => ({ style, config: applyStyle(structuredClone(DEFAULT_CONFIG), style) }))
 
 const FLOW = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => `home.flow.${n}` as StringKey)
 
@@ -16,6 +23,14 @@ const LAYERS = [
 
 export function HomePage() {
   const t = useT()
+  const { load } = useDesign()
+
+  const startFrom = (style: Style) => {
+    load(EXAMPLES.find((e) => e.style === style)!.config)
+    openDesign.set(null)
+    logoStore.set(null)
+    window.location.hash = href('/configure')
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4">
@@ -82,17 +97,32 @@ export function HomePage() {
           ))}
         </ul>
       </section>
+
+      <section aria-labelledby="examples" className="mt-14">
+        <h2 id="examples" className="kicker">
+          {t('home.examples')}
+        </h2>
+        <p className="mt-2 max-w-xl text-sm text-tide">{t('home.examples.lead')}</p>
+        <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          {EXAMPLES.map(({ style, config }) => (
+            <li key={style} className="flex flex-col rounded-xl bg-shell p-4 shadow-[0_1px_0_var(--rule)]">
+              <div className="flex items-center gap-3">
+                <SilhouetteSketch silhouette={config.shape.silhouette} className="h-16 w-auto shrink-0" />
+                <span
+                  aria-hidden="true"
+                  className="size-6 shrink-0 rounded-full ring-1 ring-rule"
+                  style={{ background: `linear-gradient(135deg, ${config.personal.shellColour} 50%, ${config.personal.capColour} 50%)` }}
+                />
+              </div>
+              <h3 className="mt-3 font-medium">{t(`style.${style}`)}</h3>
+              <p className="mt-1 flex-1 text-xs text-tide">{t(`style.${style}.note` as StringKey)}</p>
+              <Button size="sm" variant="secondary" onClick={() => startFrom(style)} className="mt-3 rounded-full">
+                {t('home.startFrom')}
+              </Button>
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   )
 }
-
-export function InspirationPage() {
-  const t = useT()
-  return <PagePlaceholder title={t('page.inspiration.title')} summary={t('page.inspiration.summary')} />
-}
-
-export function GuidePage() {
-  const t = useT()
-  return <PagePlaceholder title={t('page.guide.title')} summary={t('page.guide.summary')} />
-}
-

@@ -1,14 +1,11 @@
-import type { ComponentType } from 'react'
+import { useEffect, type ComponentType } from 'react'
 import { AppFooter } from '@/components/layout/AppFooter'
 import { AppHeader } from '@/components/layout/AppHeader'
 import { useT } from '@/i18n/language'
 import { useRoute, type Route } from '@/lib/router'
 import { ConfigurePage } from '@/pages/ConfigurePage'
-import {
-  GuidePage,
-  HomePage,
-  InspirationPage,
-} from '@/pages/pages'
+import { GuidePage, InspirationPage } from '@/pages/ContentPages'
+import { HomePage } from '@/pages/pages'
 import { MyDesignsPage } from '@/pages/MyDesignsPage'
 
 const PAGES: Record<Route, ComponentType> = {
@@ -23,6 +20,11 @@ export default function App() {
   const route = useRoute()
   const t = useT()
   const Page = PAGES[route]
+
+  // A new page starts at its top, not where the last one was scrolled to
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [route])
 
   return (
     <div className="tidewater flex min-h-dvh flex-col">
