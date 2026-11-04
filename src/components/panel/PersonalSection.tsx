@@ -76,11 +76,35 @@ function ColourPicker({ label, value, colours, onChange }: {
   )
 }
 
+export function StylePicker() {
+  const t = useT()
+  const { config, load } = useDesign()
+
+  return (
+    <div>
+      <p className="text-sm text-ink">{t('personal.style')}</p>
+      <div className="mt-1.5 flex flex-wrap gap-1.5">
+        {STYLES.map((s) => (
+          <button
+            key={s}
+            type="button"
+            onClick={() => load(applyStyle(config, s))}
+            className="rounded-full bg-canvas px-3 py-1 text-xs text-ink ring-1 ring-rule hover:bg-soft"
+          >
+            {t(`style.${s}`)}
+          </button>
+        ))}
+      </div>
+      <p className="mt-1 text-xs text-muted">{t('personal.styleNote')}</p>
+    </div>
+  )
+}
+
 export function PersonalSection() {
   const t = useT()
   const textId = useId()
   const fileId = useId()
-  const { config, patch, load } = useDesign()
+  const { config, patch } = useDesign()
   const p = config.personal
   const logo = useLogo()
   const [busy, setBusy] = useState(false)
@@ -108,23 +132,6 @@ export function PersonalSection() {
   return (
     <div className="space-y-4">
       <h2 className="kicker">{t('panel.personal')}</h2>
-
-      <div>
-        <p className="text-sm text-ink">{t('personal.style')}</p>
-        <div className="mt-1.5 flex flex-wrap gap-1.5">
-          {STYLES.map((s) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => load(applyStyle(config, s))}
-              className="rounded-full bg-canvas px-3 py-1 text-xs text-ink ring-1 ring-rule hover:bg-soft"
-            >
-              {t(`style.${s}`)}
-            </button>
-          ))}
-        </div>
-        <p className="mt-1 text-xs text-muted">{t('personal.styleNote')}</p>
-      </div>
 
       <div className="space-y-2">
         <label htmlFor={textId} className="block text-sm text-ink">

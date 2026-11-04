@@ -24,7 +24,7 @@ async function copy(text: string, fallback?: HTMLInputElement | null): Promise<b
   }
 }
 
-export function ShareSection() {
+export function ShareSection({ onNewDesign }: { onNewDesign?: () => void } = {}) {
   const t = useT()
   const nameId = useId()
   const codeId = useId()
@@ -200,6 +200,7 @@ export function ShareSection() {
             openDesign.set(null)
             logoStore.set(null)
             setStatus(null)
+            onNewDesign?.()
           }}
           className="rounded-full bg-canvas px-3 py-1 text-xs text-ink ring-1 ring-rule hover:bg-soft"
         >
