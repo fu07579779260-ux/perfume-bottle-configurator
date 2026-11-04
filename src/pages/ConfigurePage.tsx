@@ -3,6 +3,7 @@ import { AssemblySection } from '@/components/panel/AssemblySection'
 import { CapSection } from '@/components/panel/CapSection'
 import { ParamSlider } from '@/components/panel/controls'
 import { ExportSection } from '@/components/panel/ExportSection'
+import { FeedbackSection } from '@/components/panel/FeedbackSection'
 import { FitTestSection } from '@/components/panel/FitTestSection'
 import { PersonalSection } from '@/components/panel/PersonalSection'
 import { ProfileEditor } from '@/components/panel/ProfileEditor'
@@ -136,6 +137,8 @@ function BottlePanel() {
       <ExportSection />
 
       <ShareSection />
+
+      <FeedbackSection />
 
     </div>
   )

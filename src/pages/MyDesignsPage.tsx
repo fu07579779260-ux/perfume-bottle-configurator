@@ -110,6 +110,14 @@ function VersionRow({ design, version, onOpen, compare, onCompare }: {
             {t('mine.compare')}
           </label>
         </div>
+        {version.feedback && (
+          <p className="text-xs text-tide">
+            {fill(t('mine.feedback'), {
+              shell: t(`feedback.shell.${version.feedback.shell}`),
+              cap: t(`feedback.cap.${version.feedback.cap}`),
+            })}
+          </p>
+        )}
         <textarea
           value={note}
           rows={2}
