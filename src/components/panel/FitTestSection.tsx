@@ -19,7 +19,7 @@ function RingChoice({ label, rings, value, onPick }: {
   const t = useT()
   return (
     <div>
-      <p className="text-sm text-deep">{label}</p>
+      <p className="text-sm text-ink">{label}</p>
       <div role="group" aria-label={label} className="mt-1.5 grid grid-cols-5 gap-1.5">
         {rings.map((r) => {
           const active = Math.abs(r.clearance - value) < 1e-6
@@ -36,11 +36,11 @@ function RingChoice({ label, rings, value, onPick }: {
               onClick={() => onPick(r.clearance)}
               className={cn(
                 'rounded-lg py-1.5 text-center leading-tight transition-colors',
-                active ? 'bg-deep text-sand' : 'bg-foam/70 text-deep hover:bg-foam',
+                active ? 'bg-gold text-canvas' : 'bg-soft/70 text-ink hover:bg-soft',
               )}
             >
               <span className="block text-sm font-medium">{r.index}</span>
-              <span className={cn('block text-[0.65rem] tabular-nums', active ? 'text-sand/80' : 'text-tide')}>
+              <span className={cn('block text-[0.65rem] tabular-nums', active ? 'text-canvas/80' : 'text-muted')}>
                 {r.clearance.toFixed(2)}
               </span>
             </button>
@@ -72,18 +72,18 @@ export function FitTestSection() {
   return (
     <div className="space-y-3">
       <h2 className="kicker">{t('fit.title')}</h2>
-      <p className="text-xs text-tide">{t('fit.intro')}</p>
+      <p className="text-xs text-muted">{t('fit.intro')}</p>
       <Button onClick={exportRings} variant="secondary" className="w-full rounded-full">
         <Download aria-hidden="true" />
         {t('fit.download')}
       </Button>
-      <p role="status" className="text-xs text-tide">
+      <p role="status" className="text-xs text-muted">
         {printed
           ? fill(t('fit.printed'), { bed: printed.bedSize })
           : fill(t('fit.bed'), { bed: `${current.bed.width.toFixed(0)} × ${current.bed.depth.toFixed(0)} mm` })}
       </p>
 
-      <ol className="list-decimal space-y-1 pl-4 text-xs text-tide">
+      <ol className="list-decimal space-y-1 pl-4 text-xs text-muted">
         {[1, 2, 3].map((n) => (
           <li key={n}>{t(`fit.how.${n}` as StringKey)}</li>
         ))}

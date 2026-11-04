@@ -34,18 +34,18 @@ export function TextureSection() {
             onClick={() => patch('texture', { type: v })}
             className={cn(
               'rounded-full px-3.5 py-1 text-sm transition-colors',
-              tex.type === v ? 'bg-deep text-sand' : 'bg-foam/70 text-deep hover:bg-foam',
+              tex.type === v ? 'bg-gold text-canvas' : 'bg-soft/70 text-ink hover:bg-soft',
             )}
           >
             {t(`texture.${v}`)}
           </button>
         ))}
       </div>
-      {allowed.length === 1 && <p className="text-xs text-tide">{t('texture.ownStructure')}</p>}
+      {allowed.length === 1 && <p className="text-xs text-muted">{t('texture.ownStructure')}</p>}
 
       {config.mode.advanced && (
-        <div className="space-y-2 rounded-lg bg-sand p-3">
-          <p className="text-sm text-deep">{t('texture.zone')}</p>
+        <div className="space-y-2 rounded-lg bg-canvas p-3">
+          <p className="text-sm text-ink">{t('texture.zone')}</p>
           <div role="group" aria-label={t('texture.zone')} className="flex flex-wrap gap-1.5">
             {TEXTURE_ZONES.map((z) => (
               <button
@@ -55,7 +55,7 @@ export function TextureSection() {
                 onClick={() => patch('texture', { zone: z })}
                 className={cn(
                   'rounded-full px-3 py-0.5 text-xs transition-colors',
-                  tex.zone === z ? 'bg-lagoon text-white' : 'bg-shell text-deep ring-1 ring-rule hover:bg-foam',
+                  tex.zone === z ? 'bg-gold text-canvas' : 'bg-surface text-ink ring-1 ring-rule hover:bg-soft',
                 )}
               >
                 {t(`texture.zone.${z}`)}
@@ -67,7 +67,7 @@ export function TextureSection() {
           )}
           {tex.zone === 'bands' && (
             <div>
-              <p className="text-xs text-tide">{t('texture.upper')}</p>
+              <p className="text-xs text-muted">{t('texture.upper')}</p>
               <div role="group" aria-label={t('texture.upper')} className="mt-1 flex flex-wrap gap-1.5">
                 {TEXTURES.map((v) => (
                   <button
@@ -77,14 +77,14 @@ export function TextureSection() {
                     onClick={() => patch('texture', { upperType: v })}
                     className={cn(
                       'rounded-full px-3 py-0.5 text-xs transition-colors',
-                      tex.upperType === v ? 'bg-lagoon text-white' : 'bg-shell text-deep ring-1 ring-rule hover:bg-foam',
+                      tex.upperType === v ? 'bg-gold text-canvas' : 'bg-surface text-ink ring-1 ring-rule hover:bg-soft',
                     )}
                   >
                     {t(`texture.${v}`)}
                   </button>
                 ))}
               </div>
-              <p className="mt-1 text-xs text-tide">{t('texture.lowerIsMain')}</p>
+              <p className="mt-1 text-xs text-muted">{t('texture.lowerIsMain')}</p>
             </div>
           )}
         </div>
@@ -100,7 +100,7 @@ export function TextureSection() {
               onClick={() => patch('texture', { waveDirection: d })}
               className={cn(
                 'rounded-full px-3 py-0.5 text-xs transition-colors',
-                tex.waveDirection === d ? 'bg-lagoon text-white' : 'bg-sand text-deep ring-1 ring-rule hover:bg-foam',
+                tex.waveDirection === d ? 'bg-gold text-canvas' : 'bg-canvas text-ink ring-1 ring-rule hover:bg-soft',
               )}
             >
               {t(`texture.direction.${d}`)}
@@ -118,7 +118,7 @@ export function TextureSection() {
         />
       ))}
       {tex.type === 'cellular' && (
-        <div className="flex items-center justify-between gap-2 text-xs text-tide">
+        <div className="flex items-center justify-between gap-2 text-xs text-muted">
           <span role="status">
             {fill(t('texture.cells'), { n: String(openings.cells.length) })}
             {openings.skipped > 0 && <> · {fill(t('texture.skipped'), { n: String(openings.skipped) })}</>}
@@ -126,14 +126,14 @@ export function TextureSection() {
           <button
             type="button"
             onClick={() => patch('shape', { growthSeed: Math.floor(Math.random() * 10000) })}
-            className="shrink-0 rounded-full bg-foam/70 px-3 py-1 text-deep hover:bg-foam"
+            className="shrink-0 rounded-full bg-soft/70 px-3 py-1 text-ink hover:bg-soft"
           >
             {t('texture.newPattern')}
           </button>
         </div>
       )}
 
-      <h3 className="pt-2 text-sm font-medium text-deep">{t('texture.windows')}</h3>
+      <h3 className="pt-2 text-sm font-medium text-ink">{t('texture.windows')}</h3>
       <ParamSlider
         label={t('param.windowCount')}
         value={tex.windowCount}
@@ -151,7 +151,7 @@ export function TextureSection() {
                 onClick={() => patch('texture', { windowShape: w })}
                 className={cn(
                   'rounded-full px-3 py-0.5 text-xs transition-colors',
-                  tex.windowShape === w ? 'bg-lagoon text-white' : 'bg-sand text-deep ring-1 ring-rule hover:bg-foam',
+                  tex.windowShape === w ? 'bg-gold text-canvas' : 'bg-canvas text-ink ring-1 ring-rule hover:bg-soft',
                 )}
               >
                 {t(`texture.window.${w}`)}
@@ -170,7 +170,7 @@ export function TextureSection() {
             range={RANGES.texture.windowHeight}
             onChange={(windowHeight) => patch('texture', { windowHeight })}
           />
-          {openings.windows.length === 0 && <p className="text-xs text-coral-ink">{t('texture.noWindowRoom')}</p>}
+          {openings.windows.length === 0 && <p className="text-xs text-warn">{t('texture.noWindowRoom')}</p>}
         </>
       )}
     </div>

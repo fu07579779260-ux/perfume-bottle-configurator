@@ -69,30 +69,30 @@ export function ProfileEditor() {
 
   return (
     <div className="space-y-2">
-      <p className="text-sm text-deep">{t('advanced.profile')}</p>
+      <p className="text-sm text-ink">{t('advanced.profile')}</p>
       <svg
         ref={svg}
         viewBox={`-2 0 ${maxR + 4} ${top - bottom}`}
         role="group"
         aria-label={t('advanced.profile')}
-        className="w-full touch-none rounded-lg bg-sand ring-1 ring-rule"
+        className="w-full touch-none rounded-lg bg-canvas ring-1 ring-rule"
         style={{ aspectRatio: `${maxR + 4} / ${top - bottom}` }}
       >
         {/* Axis */}
-        <line x1={0} y1={0} x2={0} y2={top - bottom} stroke="var(--tide)" strokeDasharray="1.5 1.5" strokeWidth={0.25} />
+        <line x1={0} y1={0} x2={0} y2={top - bottom} stroke="var(--muted)" strokeDasharray="1.5 1.5" strokeWidth={0.25} />
         {/* Glass bottle */}
         <polyline
           points={glass.map(([r, y]) => `${toX(r)},${toY(y)}`).join(' ')}
-          fill="var(--foam)"
-          stroke="var(--tide)"
+          fill="var(--soft)"
+          stroke="var(--muted)"
           strokeWidth={0.3}
           strokeDasharray="1 1"
         />
         {/* The shell as it will be built (outline, rim, cavity) */}
         <polygon
           points={outer.map((p) => `${toX(p.r)},${toY(p.y)}`).join(' ')}
-          fill="color-mix(in oklab, var(--lagoon) 22%, transparent)"
-          stroke="var(--deep)"
+          fill="color-mix(in oklab, var(--gold) 22%, transparent)"
+          stroke="var(--ink)"
           strokeWidth={0.4}
         />
         {points.map(([pt, pw], i) => (
@@ -105,8 +105,8 @@ export function ProfileEditor() {
             role="button"
             aria-label={fill(t('advanced.point'), { n: String(i + 1), h: String(Math.round(pt * 100)), w: String(Math.round(pw * 100)) })}
             aria-pressed={selected === i}
-            className={cn('cursor-grab outline-none', selected === i ? 'fill-coral' : 'fill-lagoon')}
-            stroke="var(--shell)"
+            className={cn('cursor-grab outline-none', selected === i ? 'fill-accent' : 'fill-gold')}
+            stroke="var(--surface)"
             strokeWidth={0.6}
             onFocus={() => setSelected(i)}
             onKeyDown={onKey(i)}
@@ -122,16 +122,16 @@ export function ProfileEditor() {
           />
         ))}
       </svg>
-      <p className="text-xs text-tide">{t('advanced.profileHint')}</p>
+      <p className="text-xs text-muted">{t('advanced.profileHint')}</p>
       <div className="flex flex-wrap gap-1.5">
-        <button type="button" onClick={() => setPoints(addControlPoint(points))} className="rounded-full bg-foam/70 px-3 py-1 text-xs text-deep hover:bg-foam">
+        <button type="button" onClick={() => setPoints(addControlPoint(points))} className="rounded-full bg-soft/70 px-3 py-1 text-xs text-ink hover:bg-soft">
           {t('advanced.addPoint')}
         </button>
         <button
           type="button"
           onClick={remove}
           disabled={selected === null || points.length <= PROFILE_POINTS_MIN || selected === 0 || selected === points.length - 1}
-          className="rounded-full bg-foam/70 px-3 py-1 text-xs text-deep hover:bg-foam disabled:opacity-40"
+          className="rounded-full bg-soft/70 px-3 py-1 text-xs text-ink hover:bg-soft disabled:opacity-40"
         >
           {t('advanced.removePoint')}
         </button>
@@ -139,7 +139,7 @@ export function ProfileEditor() {
           type="button"
           onClick={() => patch('shape', { profilePoints: null })}
           disabled={!config.shape.profilePoints}
-          className="rounded-full bg-sand px-3 py-1 text-xs text-deep ring-1 ring-rule hover:bg-foam disabled:opacity-40"
+          className="rounded-full bg-canvas px-3 py-1 text-xs text-ink ring-1 ring-rule hover:bg-soft disabled:opacity-40"
         >
           {t('advanced.resetProfile')}
         </button>

@@ -17,11 +17,11 @@ export function AppHeader({ route }: { route: Route }) {
   const t = useT()
 
   return (
-    <header className="sticky top-0 z-40 border-b border-rule/70 bg-sand/85 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-rule/70 bg-canvas/85 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
         <a href={href('/')} className="flex items-center gap-2.5">
           <BottleMark className="size-8" />
-          <span className="font-display text-lg leading-none font-semibold [font-variation-settings:'SOFT'_100]">
+          <span className="font-display text-lg leading-none font-semibold">
             {t('app.title')}
           </span>
         </a>
@@ -39,7 +39,7 @@ export function AppHeader({ route }: { route: Route }) {
                 aria-current={r === route ? 'page' : undefined}
                 className={cn(
                   'block rounded-full px-3.5 py-1.5 text-sm transition-colors',
-                  r === route ? 'bg-deep font-medium text-sand' : 'text-tide hover:bg-foam hover:text-deep',
+                  r === route ? 'bg-gold font-medium text-canvas' : 'text-muted hover:bg-soft hover:text-ink',
                 )}
               >
                 {t(NAV_LABELS[r])}

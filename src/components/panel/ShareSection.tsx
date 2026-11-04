@@ -93,7 +93,7 @@ export function ShareSection() {
 
       {current ? (
         <div className="space-y-2">
-          <p className="text-xs text-tide">{fill(t('save.editing'), { name: current.name, n: String(open!.n) })}</p>
+          <p className="text-xs text-muted">{fill(t('save.editing'), { name: current.name, n: String(open!.n) })}</p>
           <Button onClick={() => void saveVersion()} className="w-full rounded-full">
             {fill(t('save.asVersion'), { n: String(Math.max(...current.versions.map((v) => v.n)) + 1) })}
           </Button>
@@ -108,28 +108,28 @@ export function ShareSection() {
           value={name}
           placeholder={t('save.namePlaceholder')}
           onChange={(e) => setName(e.target.value)}
-          className="min-w-0 flex-1 rounded-full bg-sand px-3 py-1.5 text-sm text-deep ring-1 ring-rule focus:ring-2 focus:ring-lagoon focus:outline-none"
+          className="min-w-0 flex-1 rounded-full bg-canvas px-3 py-1.5 text-sm text-ink ring-1 ring-rule focus:ring-2 focus:ring-gold focus:outline-none"
         />
         <Button onClick={() => void saveNew()} variant={current ? 'secondary' : 'default'} className="rounded-full">
           {current ? t('save.asNew') : t('save.save')}
         </Button>
       </div>
-      <p role="status" className="text-xs text-tide">
+      <p role="status" className="text-xs text-muted">
         {status}{' '}
         {status && (
-          <a href={href('/my-designs')} className="text-lagoon underline underline-offset-2">
+          <a href={href('/my-designs')} className="text-gold underline underline-offset-2">
             {t('save.toMyDesigns')}
           </a>
         )}
       </p>
 
-      <div className="space-y-1.5 rounded-lg bg-sand p-3">
-        <p className="text-sm text-deep">{t('save.share')}</p>
+      <div className="space-y-1.5 rounded-lg bg-canvas p-3">
+        <p className="text-sm text-ink">{t('save.share')}</p>
         <div className="flex gap-1.5">
           <button
             type="button"
             onClick={() => void copy(share.url).then((ok) => ok && flash('link'))}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-foam/70 px-3 py-1 text-xs text-deep hover:bg-foam"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-soft/70 px-3 py-1 text-xs text-ink hover:bg-soft"
           >
             {copied === 'link' ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
             {t('save.copyLink')}
@@ -137,7 +137,7 @@ export function ShareSection() {
           <button
             type="button"
             onClick={() => void copy(code, codeField).then((ok) => ok && flash('code'))}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-foam/70 px-3 py-1 text-xs text-deep hover:bg-foam"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-soft/70 px-3 py-1 text-xs text-ink hover:bg-soft"
           >
             {copied === 'code' ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
             {t('save.copyCode')}
@@ -149,11 +149,11 @@ export function ShareSection() {
           value={code}
           aria-label={t('save.code')}
           onFocus={(e) => e.target.select()}
-          className="w-full truncate rounded-md bg-shell px-2 py-1 font-mono text-[0.7rem] text-tide"
+          className="w-full truncate rounded-md bg-surface px-2 py-1 font-mono text-[0.7rem] text-muted"
         />
-        <p className="text-xs text-tide">
+        <p className="text-xs text-muted">
           {fill(t('save.codeNote'), { code: designCode(config) })}
-          {share.droppedLogo && <span className="text-coral-ink"> {t('save.logoNotShared')}</span>}
+          {share.droppedLogo && <span className="text-warn"> {t('save.logoNotShared')}</span>}
         </p>
         <div className="flex gap-1.5 pt-1">
           <label htmlFor={codeId} className="sr-only">
@@ -164,9 +164,9 @@ export function ShareSection() {
             value={paste}
             placeholder={t('save.pasteCode')}
             onChange={(e) => setPaste(e.target.value)}
-            className="min-w-0 flex-1 rounded-full bg-shell px-3 py-1 text-xs text-deep ring-1 ring-rule focus:ring-2 focus:ring-lagoon focus:outline-none"
+            className="min-w-0 flex-1 rounded-full bg-surface px-3 py-1 text-xs text-ink ring-1 ring-rule focus:ring-2 focus:ring-gold focus:outline-none"
           />
-          <button type="button" onClick={openCode} disabled={!paste.trim()} className="rounded-full bg-deep px-3 py-1 text-xs text-sand disabled:opacity-40">
+          <button type="button" onClick={openCode} disabled={!paste.trim()} className="rounded-full bg-gold px-3 py-1 text-xs text-canvas disabled:opacity-40">
             {t('save.open')}
           </button>
         </div>
@@ -176,11 +176,11 @@ export function ShareSection() {
         <button
           type="button"
           onClick={() => downloadFile(toDesignFile(config), `perfume-${designCode(config)}.json`, 'application/json')}
-          className="rounded-full bg-foam/70 px-3 py-1 text-xs text-deep hover:bg-foam"
+          className="rounded-full bg-soft/70 px-3 py-1 text-xs text-ink hover:bg-soft"
         >
           {t('save.exportJson')}
         </button>
-        <label className="cursor-pointer rounded-full bg-foam/70 px-3 py-1 text-xs text-deep hover:bg-foam has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-lagoon">
+        <label className="cursor-pointer rounded-full bg-soft/70 px-3 py-1 text-xs text-ink hover:bg-soft has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-gold">
           {t('save.importJson')}
           <input
             type="file"
@@ -201,7 +201,7 @@ export function ShareSection() {
             logoStore.set(null)
             setStatus(null)
           }}
-          className="rounded-full bg-sand px-3 py-1 text-xs text-deep ring-1 ring-rule hover:bg-foam"
+          className="rounded-full bg-canvas px-3 py-1 text-xs text-ink ring-1 ring-rule hover:bg-soft"
         >
           {t('save.newDesign')}
         </button>

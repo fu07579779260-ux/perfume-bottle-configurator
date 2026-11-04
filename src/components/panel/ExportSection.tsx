@@ -55,7 +55,7 @@ export function ExportSection() {
   return (
     <div className="space-y-3">
       <h2 className="kicker">{t('export.title')}</h2>
-      <p className="text-xs text-tide">
+      <p className="text-xs text-muted">
         {partsLine}
         {capMagnets?.fits && (
           <> {fill(t('export.capMagnets'), { d: String(config.assembly.magnetDiameter), h: String(config.assembly.magnetHeight) })}</>
@@ -72,28 +72,28 @@ export function ExportSection() {
             type="button"
             disabled={busy !== null}
             onClick={() => void run(f)}
-            className="rounded-lg bg-foam/70 px-2.5 py-1.5 text-left text-xs text-deep hover:bg-foam disabled:opacity-50"
+            className="rounded-lg bg-soft/70 px-2.5 py-1.5 text-left text-xs text-ink hover:bg-soft disabled:opacity-50"
           >
             <span className="block font-medium">{busy === f ? t('export.building') : t(`export.format.${f}` as StringKey)}</span>
-            <span className="block text-[0.7rem] text-tide">{t(`export.format.${f}.note` as StringKey)}</span>
+            <span className="block text-[0.7rem] text-muted">{t(`export.format.${f}.note` as StringKey)}</span>
           </button>
         ))}
       </div>
 
       <div role="status" className="space-y-1 text-xs">
-        {failed && <p className="font-medium text-coral-ink">{t('export.failed')}</p>}
-        {method === 'halves' && !joint.fits && <p className="font-medium text-coral-ink">{t('export.noJoint')}</p>}
-        {!wall.ok && <p className="font-medium text-coral-ink">{t('export.thinWarning')}</p>}
+        {failed && <p className="font-medium text-warn">{t('export.failed')}</p>}
+        {method === 'halves' && !joint.fits && <p className="font-medium text-warn">{t('export.noJoint')}</p>}
+        {!wall.ok && <p className="font-medium text-warn">{t('export.thinWarning')}</p>}
         {last && (
-          <p className="text-tide">
-            <span className="break-all text-deep">{last.name}</span> · {last.kb} KB
+          <p className="text-muted">
+            <span className="break-all text-ink">{last.name}</span> · {last.kb} KB
           </p>
         )}
       </div>
 
-      <div className="rounded-lg bg-foam/50 p-3 text-xs text-deep">
+      <div className="rounded-lg bg-soft/50 p-3 text-xs text-ink">
         <p className="font-medium">{t('export.tips')}</p>
-        <ul className="mt-1.5 list-disc space-y-1 pl-4 text-tide">
+        <ul className="mt-1.5 list-disc space-y-1 pl-4 text-muted">
           {[1, 2, 3].map((n) => (
             <li key={n}>{t(`export.tip.${tech}.${n}` as StringKey)}</li>
           ))}

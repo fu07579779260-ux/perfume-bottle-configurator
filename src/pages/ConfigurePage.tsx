@@ -63,7 +63,7 @@ function BottlePanel() {
               onClick={() => patch('bottle', { preset: p })}
               className={cn(
                 'rounded-full px-4 py-1.5 text-sm transition-colors',
-                config.bottle.preset === p ? 'bg-deep text-sand' : 'bg-foam/70 text-deep hover:bg-foam',
+                config.bottle.preset === p ? 'bg-gold text-canvas' : 'bg-soft/70 text-ink hover:bg-soft',
               )}
             >
               {p.replace('ml', ' ml')}
@@ -74,16 +74,16 @@ function BottlePanel() {
 
       <SilhouettePicker />
 
-      <label className="flex cursor-pointer items-start gap-2.5 rounded-lg bg-sand px-3 py-2">
+      <label className="flex cursor-pointer items-start gap-2.5 rounded-lg bg-canvas px-3 py-2">
         <input
           type="checkbox"
           checked={config.mode.advanced}
           onChange={(e) => patch('mode', { advanced: e.target.checked })}
-          className="mt-0.5 size-4 accent-lagoon"
+          className="mt-0.5 size-4 accent-gold"
         />
         <span>
-          <span className="block text-sm font-medium text-deep">{t('advanced.switch')}</span>
-          <span className="block text-xs text-tide">{t('advanced.switchNote')}</span>
+          <span className="block text-sm font-medium text-ink">{t('advanced.switch')}</span>
+          <span className="block text-xs text-muted">{t('advanced.switchNote')}</span>
         </span>
       </label>
 
@@ -98,12 +98,12 @@ function BottlePanel() {
             onChange={(v) => patch('shape', { [key]: v })}
           />
         ))}
-        {config.mode.advanced && config.shape.profilePoints && <p className="text-xs text-tide">{t('advanced.slidersNote')}</p>}
+        {config.mode.advanced && config.shape.profilePoints && <p className="text-xs text-muted">{t('advanced.slidersNote')}</p>}
         {config.shape.silhouette === 'coral' && (
           <button
             type="button"
             onClick={() => patch('shape', { growthSeed: Math.floor(Math.random() * 10000) })}
-            className="rounded-full bg-foam/70 px-3.5 py-1 text-sm text-deep hover:bg-foam"
+            className="rounded-full bg-soft/70 px-3.5 py-1 text-sm text-ink hover:bg-soft"
           >
             {t('shape.newGrowth')}
           </button>
@@ -156,8 +156,8 @@ export function ConfigurePage() {
         <ViewportErrorBoundary message={t('viewport.failed')}>
           <Suspense
             fallback={
-              <div className="flex h-full items-center justify-center rounded-xl bg-shell">
-                <p className="text-sm text-tide">{t('viewport.loading')}</p>
+              <div className="flex h-full items-center justify-center rounded-xl bg-surface">
+                <p className="text-sm text-muted">{t('viewport.loading')}</p>
               </div>
             }
           >
@@ -166,7 +166,7 @@ export function ConfigurePage() {
         </ViewportErrorBoundary>
       </section>
 
-      <aside aria-label={t('panel.label')} className="rounded-xl bg-shell shadow-[0_1px_0_var(--rule)] lg:order-1 lg:w-80 lg:overflow-y-auto">
+      <aside aria-label={t('panel.label')} className="rounded-xl bg-surface shadow-[0_1px_0_var(--rule)] lg:order-1 lg:w-80 lg:overflow-y-auto">
         <BottlePanel />
       </aside>
     </div>

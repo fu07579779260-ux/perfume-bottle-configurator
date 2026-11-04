@@ -26,7 +26,7 @@ export function ParamSlider({ label, value, range, onChange }: {
 
   return (
     <div className="space-y-1">
-      <label htmlFor={id} className="block text-sm text-deep">
+      <label htmlFor={id} className="block text-sm text-ink">
         {label}
       </label>
       <div className="flex items-center gap-3">
@@ -39,9 +39,9 @@ export function ParamSlider({ label, value, range, onChange }: {
           value={value}
           aria-valuetext={unit ? `${shown} ${unit}` : shown}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="h-6 min-w-0 flex-1 accent-lagoon"
+          className="h-6 min-w-0 flex-1 accent-gold"
         />
-        <span className="flex items-center rounded-full bg-sand px-2 ring-1 ring-rule focus-within:ring-2 focus-within:ring-lagoon">
+        <span className="flex items-center rounded-full bg-canvas px-2 ring-1 ring-rule focus-within:ring-2 focus-within:ring-gold">
           <input
             type="number"
             aria-label={unit ? `${label} (${unit})` : label}
@@ -52,7 +52,7 @@ export function ParamSlider({ label, value, range, onChange }: {
             onChange={(e) => e.target.value !== '' && onChange(Number(e.target.value))}
             className="w-14 bg-transparent py-1 text-right text-sm tabular-nums outline-none"
           />
-          {unit && <span className="pl-1 text-xs text-tide">{unit}</span>}
+          {unit && <span className="pl-1 text-xs text-muted">{unit}</span>}
         </span>
       </div>
     </div>

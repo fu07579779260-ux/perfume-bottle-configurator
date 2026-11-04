@@ -1,6 +1,7 @@
 import { ContactShadows, Environment, Lightformer, OrbitControls } from '@react-three/drei'
 import { Canvas, useThree } from '@react-three/fiber'
-import { useLayoutEffect, useState } from 'react'
+import { useLayoutEffect, useMemo, useState } from 'react'
+import { AdditiveBlending, CanvasTexture } from 'three'
 import { bottleTotalHeight } from '@/geometry/bottle'
 import { capLayout } from '@/geometry/cap'
 import { checkOverhang, checkWall, shellLayout, shellSize } from '@/geometry/shell'
@@ -14,9 +15,13 @@ import { useShellParts } from './use-shell-parts'
 import { useMarks } from '@/personal/use-marks'
 
 // Scene units are millimetres, Y up, Y = 0 at the base of the glass bottle.
-// Colours follow the ocean theme tokens.
-const BACKDROP = '#eef1ea'
-const SHADOW = '#123a40'
+// Lit like a boutique window: a dark room, a warm spot from above, a rim
+// light from behind, and the bottle standing on a plinth.
+const BACKDROP = '#0c0a08'
+const WARM = '#ffe2b4'
+const PLINTH = '#16130f'
+const GOLD = '#c9a45c'
+const PLINTH_HEIGHT = 8
 
 /** A slightly raised three-quarter view; the distance scales with the bottle's height. */
 const DIRECTION = (() => {
@@ -43,19 +48,59 @@ function CameraHome({ homeKey, distance, targetY }: { homeKey: string; distance:
 }
 
 /**
- * Studio light built from soft panels inside the scene, so no HDR file is
- * downloaded from a CDN (the site must also work in mainland China).
+ * Reflections from soft panels inside the scene, so no HDR file is downloaded
+ * from a CDN (the site must also work in mainland China): a warm softbox
+ * above, two tall strip lights for the long highlights on glass and metal,
+ * and a dim warm surround so nothing reflects pure black.
  */
-function StudioLight() {
+function ShowcaseLight() {
   return (
     <Environment resolution={256} frames={1}>
-      {/* Soft surround instead of black, so the metal pump reflects light */}
-      <color attach="background" args={['#c9d6d2']} />
-      <Lightformer form="rect" intensity={2.4} color="#ffffff" position={[0, 6, 4]} scale={[10, 4, 1]} rotation-x={-0.8} />
-      <Lightformer form="rect" intensity={1.6} color="#e9f5f1" position={[-6, 1, 2]} scale={[3, 8, 1]} rotation-y={Math.PI / 2.5} />
-      <Lightformer form="rect" intensity={1.2} color="#fff3e3" position={[6, 1, 1]} scale={[3, 8, 1]} rotation-y={-Math.PI / 2.5} />
-      <Lightformer form="ring" intensity={0.8} color="#d5e8e2" position={[0, 2, -8]} scale={6} />
+      <color attach="background" args={['#211b14']} />
+      <Lightformer form="rect" intensity={3} color={WARM} position={[0, 6, 2]} scale={[8, 3, 1]} rotation-x={-1.1} />
+      <Lightformer form="rect" intensity={2.2} color="#fff1dc" position={[-5, 1, 3]} scale={[1.2, 9, 1]} rotation-y={Math.PI / 3} />
+      <Lightformer form="rect" intensity={1.4} color="#ffd9a3" position={[5, 1, 3]} scale={[1.2, 9, 1]} rotation-y={-Math.PI / 3} />
+      <Lightformer form="ring" intensity={1.2} color={GOLD} position={[0, 2, -7]} scale={5} />
     </Environment>
+  )
+}
+
+/** A soft round pool of warm light, as a texture for the top of the plinth. */
+function useLightPool() {
+  return useMemo(() => {
+    const size = 256
+    const canvas = document.createElement('canvas')
+    canvas.width = size
+    canvas.height = size
+    const ctx = canvas.getContext('2d')!
+    const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2)
+    g.addColorStop(0, 'rgba(255, 226, 180, 0.55)')
+    g.addColorStop(0.45, 'rgba(255, 210, 150, 0.18)')
+    g.addColorStop(1, 'rgba(255, 210, 150, 0)')
+    ctx.fillStyle = g
+    ctx.fillRect(0, 0, size, size)
+    return new CanvasTexture(canvas)
+  }, [])
+}
+
+/** A dark display plinth with a fine gold edge, its top at `top`. */
+function Plinth({ top, radius }: { top: number; radius: number }) {
+  const pool = useLightPool()
+  return (
+    <group position={[0, top, 0]}>
+      <mesh position={[0, -PLINTH_HEIGHT / 2, 0]} receiveShadow>
+        <cylinderGeometry args={[radius, radius * 1.02, PLINTH_HEIGHT, 96]} />
+        <meshStandardMaterial color={PLINTH} roughness={0.35} metalness={0.4} />
+      </mesh>
+      <mesh rotation-x={Math.PI / 2}>
+        <torusGeometry args={[radius, 0.45, 12, 128]} />
+        <meshStandardMaterial color={GOLD} roughness={0.25} metalness={1} />
+      </mesh>
+      <mesh rotation-x={-Math.PI / 2} position={[0, 0.05, 0]}>
+        <circleGeometry args={[radius * 0.95, 96]} />
+        <meshBasicMaterial map={pool} transparent blending={AdditiveBlending} depthWrite={false} />
+      </mesh>
+    </group>
   )
 }
 
@@ -78,20 +123,25 @@ export default function Viewport() {
   const distance = height * DISTANCE_PER_MM
   const targetY = height * 0.46
   const homeKey = `${bottle.bodyDiameter}:${height}`
+  const plinthRadius = bottle.bodyDiameter * 1.3 + 14
   const mm = (v: number) => v.toFixed(1)
 
   return (
-    <div className="relative h-full min-h-80 overflow-hidden rounded-xl bg-[#eef1ea] shadow-[0_1px_0_var(--rule)]">
+    <div className="relative h-full min-h-80 overflow-hidden rounded-xl bg-[#0c0a08] ring-1 ring-rule">
       <Canvas
         frameloop="demand"
         dpr={[1, 2]}
         camera={{ position: DIRECTION.map((c) => c * distance) as [number, number, number], fov: 30, near: 1, far: 5000 }}
-        fallback={<p className="p-4 text-sm text-tide">{t('viewport.noWebgl')}</p>}
+        fallback={<p className="p-4 text-sm text-muted">{t('viewport.noWebgl')}</p>}
       >
         <color attach="background" args={[BACKDROP]} />
-        <ambientLight intensity={0.35} />
-        <directionalLight position={[60, 120, 80]} intensity={1.2} />
-        <StudioLight />
+        <fog attach="fog" args={[BACKDROP, height * 3, height * 7]} />
+        <ambientLight intensity={0.12} />
+        {/* The window spot from above, and a warm rim light from behind */}
+        <spotLight position={[0, height * 3.2, height * 1.2]} angle={0.42} penumbra={0.85} intensity={2.4} decay={0} color={WARM} />
+        <directionalLight position={[-height, height * 0.8, -height * 1.5]} intensity={0.9} color="#ffcf8f" />
+        <ShowcaseLight />
+        <Plinth top={bottomY} radius={plinthRadius} />
 
         <GlassBottle bottle={bottle} liquidColour={config.personal.liquidColour} />
         {parts.map((part) => (
@@ -104,12 +154,12 @@ export default function Viewport() {
           />
         ))}
         <ContactShadows
-          position={[0, bottomY - 0.01, 0]}
-          scale={bottle.bodyDiameter * 4}
+          position={[0, bottomY + 0.08, 0]}
+          scale={plinthRadius * 2}
           far={height * 0.6}
           blur={2.4}
-          opacity={0.35}
-          color={SHADOW}
+          opacity={0.7}
+          color="#000000"
           frames={1}
           key={`shadow:${homeKey}`}
         />
@@ -132,17 +182,17 @@ export default function Viewport() {
       {/* role=status: screen readers hear the new size and wall check after each change */}
       <dl
         role="status"
-        className="pointer-events-none absolute bottom-3 left-3 max-w-[calc(100%-1.5rem)] space-y-1 rounded-lg bg-shell/85 px-3 py-2 text-xs tabular-nums backdrop-blur-sm"
+        className="pointer-events-none absolute bottom-3 left-3 max-w-[calc(100%-1.5rem)] space-y-1 rounded-lg bg-surface/85 px-3 py-2 text-xs tabular-nums backdrop-blur-sm"
       >
         <div className="flex flex-wrap gap-x-2">
-          <dt className="text-tide">{t('viewport.shell')}</dt>
-          <dd className="text-deep">
+          <dt className="text-muted">{t('viewport.shell')}</dt>
+          <dd className="text-ink">
             {mm(size.width)} × {mm(size.depth)} × {mm(size.height)} mm
           </dd>
         </div>
         <div className="flex flex-wrap gap-x-2">
-          <dt className="text-tide">{t('viewport.wall')}</dt>
-          <dd className={cn(wall.ok ? 'text-deep' : 'font-semibold text-coral-ink')}>
+          <dt className="text-muted">{t('viewport.wall')}</dt>
+          <dd className={cn(wall.ok ? 'text-ink' : 'font-semibold text-warn')}>
             {mm(wall.minWall)} mm{' '}
             {wall.ok
               ? fill(t('viewport.wallOk'), { min: mm(wall.required) })
@@ -151,17 +201,17 @@ export default function Viewport() {
         </div>
         {!overhang.ok && overhang.limit !== null && (
           <div className="flex flex-wrap gap-x-2">
-            <dt className="text-tide">{t('viewport.overhang')}</dt>
-            <dd className="font-semibold text-coral-ink">
+            <dt className="text-muted">{t('viewport.overhang')}</dt>
+            <dd className="font-semibold text-warn">
               {fill(t('viewport.overhangSteep'), { angle: String(overhang.maxAngle), limit: String(overhang.limit) })}
             </dd>
           </div>
         )}
       </dl>
       <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4">
-        <p className="text-xs text-tide">
+        <p className="text-xs text-muted">
           {t('viewport.hint')}
-          {cutting && <span className="ml-2 text-lagoon">· {t('viewport.cutting')}</span>}
+          {cutting && <span className="ml-2 text-gold">· {t('viewport.cutting')}</span>}
         </p>
         <button
           type="button"
@@ -169,7 +219,7 @@ export default function Viewport() {
           onClick={() => setSeeThrough((v) => !v)}
           className={cn(
             'pointer-events-auto shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium shadow-sm transition-colors',
-            seeThrough ? 'bg-deep text-sand' : 'bg-shell text-deep hover:bg-foam',
+            seeThrough ? 'bg-gold text-canvas' : 'bg-surface text-ink hover:bg-soft',
           )}
         >
           {t('viewport.seeThrough')}

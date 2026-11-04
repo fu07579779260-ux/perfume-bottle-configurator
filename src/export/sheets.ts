@@ -8,7 +8,7 @@ import type { Summary } from './summary'
 // fonts, so Chinese text works without a font file.
 
 const FONT = '"Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif'
-const SERIF = '"Fraunces Variable", "Songti SC", "Noto Serif SC", Georgia, serif'
+const SERIF = '"Cormorant Garamond", "Songti SC", "Noto Serif SC", Georgia, serif'
 const C = { sand: '#f5efe4', shell: '#fbf8f2', deep: '#123a40', tide: '#4b6a6c', lagoon: '#2b7a74', coral: '#a13d24', rule: '#e3d9c8' }
 
 function loadImage(src: string): Promise<HTMLImageElement> {
@@ -71,7 +71,7 @@ export async function designCard(summary: Summary, shareUrl: string, lang: Langu
   const ctx = canvas.getContext('2d')!
   ctx.fillStyle = C.sand
   ctx.fillRect(0, 0, 1600, 900)
-  ctx.fillStyle = '#eef1ea'
+  ctx.fillStyle = '#0c0a08'
   ctx.fillRect(40, 40, 700, 820)
   const render = await renderImage()
   if (render) drawFit(ctx, render, 40, 40, 700, 820)
@@ -134,7 +134,7 @@ async function specCanvas(summary: Summary, shareUrl: string, lang: Language): P
   ctx.fillText(summary.code, left, 232)
 
   const render = await renderImage()
-  ctx.fillStyle = '#eef1ea'
+  ctx.fillStyle = '#0c0a08'
   ctx.fillRect(W - left - 420, 70, 420, 520)
   if (render) drawFit(ctx, render, W - left - 420, 70, 420, 520)
 

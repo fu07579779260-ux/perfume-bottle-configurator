@@ -14,7 +14,7 @@ function Pills<T extends string>({ label, value, options, onChange }: {
 }) {
   return (
     <div>
-      <p className="text-sm text-deep">{label}</p>
+      <p className="text-sm text-ink">{label}</p>
       <div role="group" aria-label={label} className="mt-1.5 flex flex-wrap gap-1.5">
         {options.map((o) => (
           <button
@@ -24,7 +24,7 @@ function Pills<T extends string>({ label, value, options, onChange }: {
             onClick={() => onChange(o.value)}
             className={cn(
               'rounded-full px-3.5 py-1 text-sm transition-colors',
-              value === o.value ? 'bg-deep text-sand' : 'bg-foam/70 text-deep hover:bg-foam',
+              value === o.value ? 'bg-gold text-canvas' : 'bg-soft/70 text-ink hover:bg-soft',
             )}
           >
             {o.label}
@@ -49,8 +49,8 @@ export function AssemblySection() {
           <label
             key={m}
             className={cn(
-              'flex cursor-pointer gap-3 rounded-lg px-3 py-2 transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-lagoon',
-              a.method === m ? 'bg-foam ring-2 ring-deep' : 'bg-sand hover:bg-foam/60',
+              'flex cursor-pointer gap-3 rounded-lg px-3 py-2 transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-gold',
+              a.method === m ? 'bg-soft ring-2 ring-ink' : 'bg-canvas hover:bg-soft/60',
             )}
           >
             <input
@@ -59,18 +59,18 @@ export function AssemblySection() {
               value={m}
               checked={a.method === m}
               onChange={() => patch('assembly', { method: m })}
-              className="mt-1 accent-lagoon"
+              className="mt-1 accent-gold"
             />
             <span>
-              <span className="text-sm font-medium text-deep">
+              <span className="text-sm font-medium text-ink">
                 {t(`assembly.${m}`)}
                 {m === recommended && (
-                  <span className="ml-2 rounded-full bg-shell px-2 py-0.5 text-[0.65rem] font-normal text-lagoon">
+                  <span className="ml-2 rounded-full bg-surface px-2 py-0.5 text-[0.65rem] font-normal text-gold">
                     {t('assembly.recommended')}
                   </span>
                 )}
               </span>
-              <span className="mt-0.5 block text-xs text-tide">{t(`assembly.${m}.note`)}</span>
+              <span className="mt-0.5 block text-xs text-muted">{t(`assembly.${m}.note`)}</span>
             </span>
           </label>
         ))}

@@ -1,65 +1,68 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 /* Bundled with the app (no font CDN), so it also loads in mainland China */
-@import "@fontsource-variable/fraunces/soft.css";
+@import "@fontsource/cormorant-garamond/500.css";
+@import "@fontsource/cormorant-garamond/600.css";
+@import "@fontsource/cormorant-garamond/500-italic.css";
 
 /*
- * Ocean / organic theme: warm sand, deep lagoon ink, sea-foam and one coral
- * accent; soft radii and flowing curves. Deliberately different from the
- * keycap configurator (paper + ink technical drawing) and the vase
- * configurator (dark, soft). Chinese text uses the system fonts.
+ * Perfume boutique: a dark showroom with warm gold, an elegant serif for
+ * headings, and the bottle lit like a piece in a window display. Different
+ * from the keycap configurator (light technical drawing) and the vase
+ * configurator (dark and soft) through the gold-on-black contrast, the fine
+ * rules and the serif. Chinese text uses the system fonts (Song for headings).
  */
 :root {
-  --radius: 1rem;
+  --radius: 0.5rem;
 
-  --sand: #f5efe4;
-  --shell: #fbf8f2; /* cards, raised surfaces */
-  --deep: #123a40; /* main text, 11:1 on sand */
-  --tide: #4b6a6c; /* secondary text, 5.4:1 on sand */
-  --lagoon: #2b7a74; /* primary actions */
-  --foam: #d5e8e2; /* soft fills, selected states */
-  --coral: #d9694c; /* the single warm accent */
-  --coral-ink: #a13d24; /* coral for warning text, 5.6:1 on shell */
-  --rule: #e3d9c8; /* hairlines */
+  --canvas: #0e0c0a; /* page background, warm black */
+  --surface: #1a1714; /* cards, raised surfaces */
+  --ink: #f2e9d8; /* main text, champagne, 16:1 on canvas */
+  --muted: #b4a78f; /* secondary text, 8:1 on canvas, 7:1 on surface */
+  --gold: #c9a45c; /* primary actions, selected states, 8:1 on canvas */
+  --soft: #2a241d; /* soft fills */
+  --accent: #e3c27c; /* the light gold of caps and highlights */
+  --warn: #f2967c; /* warnings, 7:1 on surface */
+  --rule: #3b3329; /* hairlines */
 
-  --background: var(--sand);
-  --foreground: var(--deep);
-  --card: var(--shell);
-  --card-foreground: var(--deep);
-  --popover: var(--shell);
-  --popover-foreground: var(--deep);
-  --primary: var(--lagoon);
-  --primary-foreground: #ffffff;
-  --secondary: var(--foam);
-  --secondary-foreground: var(--deep);
-  --muted: #ece4d6;
-  --muted-foreground: var(--tide);
-  --accent: var(--foam);
-  --accent-foreground: var(--deep);
-  --destructive: #b42318;
+  --background: var(--canvas);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --popover: var(--surface);
+  --popover-foreground: var(--ink);
+  --primary: var(--gold);
+  --primary-foreground: #14110d;
+  --secondary: var(--soft);
+  --secondary-foreground: var(--ink);
+  --muted-foreground: var(--muted);
+  --accent-foreground: #14110d;
+  --destructive: #e5654c;
   --border: var(--rule);
-  --input: #cfc3ae;
-  --ring: var(--lagoon);
+  --input: #51473a;
+  --ring: var(--gold);
+
+  color-scheme: dark;
 }
 
 @theme inline {
   --font-sans: ui-sans-serif, system-ui, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
-  --font-display: "Fraunces Variable", "Songti SC", "Noto Serif SC", Georgia, serif;
+  --font-display: "Cormorant Garamond", "Songti SC", "STSong", "Noto Serif SC", "SimSun", Georgia, serif;
   --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
 
-  --radius-sm: calc(var(--radius) - 0.5rem);
-  --radius-md: calc(var(--radius) - 0.25rem);
-  --radius-lg: var(--radius);
+  --radius-sm: calc(var(--radius) - 0.25rem);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 0.25rem);
   --radius-xl: calc(var(--radius) + 0.5rem);
 
-  --color-sand: var(--sand);
-  --color-shell: var(--shell);
-  --color-deep: var(--deep);
-  --color-tide: var(--tide);
-  --color-lagoon: var(--lagoon);
-  --color-foam: var(--foam);
-  --color-coral: var(--coral);
-  --color-coral-ink: var(--coral-ink);
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-gold: var(--gold);
+  --color-soft: var(--soft);
+  --color-accent: var(--accent);
+  --color-warn: var(--warn);
   --color-rule: var(--rule);
 
   --color-background: var(--background);
@@ -72,9 +75,7 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
@@ -93,7 +94,10 @@
   h2,
   h3 {
     font-family: var(--font-display);
-    font-variation-settings: "SOFT" 100;
+    letter-spacing: 0.01em;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--gold) 40%, transparent);
   }
   :focus-visible {
     outline: 2px solid var(--ring);
@@ -102,33 +106,31 @@
 }
 
 @layer components {
-  /* Small label above headings and sections */
+  /* Small capitals above headings and sections */
   .kicker {
-    @apply font-sans text-xs font-medium tracking-[0.18em] text-tide uppercase;
+    @apply font-sans text-[0.7rem] font-medium tracking-[0.28em] text-gold uppercase;
   }
   :lang(zh-CN) .kicker {
-    @apply tracking-[0.08em];
+    @apply tracking-[0.12em];
   }
 
-  /* Soft light pooling in the water, behind every page */
-  .tidewater {
+  /* A warm spotlight falling on the showroom from above, fading to black */
+  .showroom {
     background:
-      radial-gradient(60rem 30rem at 85% -10%, color-mix(in oklab, var(--foam) 90%, transparent), transparent 70%),
-      radial-gradient(40rem 24rem at -10% 30%, color-mix(in oklab, var(--foam) 55%, transparent), transparent 70%),
-      var(--sand);
+      radial-gradient(60rem 36rem at 50% -12%, color-mix(in oklab, var(--gold) 16%, transparent), transparent 70%),
+      radial-gradient(40rem 30rem at 100% 100%, color-mix(in oklab, var(--gold) 6%, transparent), transparent 70%),
+      var(--canvas);
   }
-}
 
-@media (prefers-reduced-motion: no-preference) {
-  .drift {
-    animation: drift 14s ease-in-out infinite alternate;
+  /* A fine gold rule with a small diamond in the middle */
+  .gilt-rule {
+    @apply relative h-px w-full;
+    background: linear-gradient(90deg, transparent, var(--gold) 20%, var(--gold) 80%, transparent);
   }
-  @keyframes drift {
-    from {
-      transform: translateX(0);
-    }
-    to {
-      transform: translateX(-3%);
-    }
+  .gilt-rule::after {
+    content: "";
+    @apply absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rotate-45;
+    background: var(--canvas);
+    box-shadow: 0 0 0 1px var(--gold);
   }
 }

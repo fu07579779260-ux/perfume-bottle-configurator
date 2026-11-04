@@ -17,8 +17,8 @@ export function captureJpegDataUrl(maxWidth = 900): string | null {
   small.width = Math.round(canvas.width * scale)
   small.height = Math.round(canvas.height * scale)
   const ctx = small.getContext('2d')!
-  // JPEG has no transparency: start from the paper colour
-  ctx.fillStyle = '#eef1ea'
+  // JPEG has no transparency: start from the showroom colour
+  ctx.fillStyle = '#0c0a08'
   ctx.fillRect(0, 0, small.width, small.height)
   ctx.drawImage(canvas, 0, 0, small.width, small.height)
   return small.toDataURL('image/jpeg', 0.85)

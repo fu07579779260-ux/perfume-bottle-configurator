@@ -46,13 +46,13 @@ function Photo({ id, onRemove }: { id: string; onRemove: () => void }) {
           <img src={url} alt={t('mine.photo')} className="size-20 rounded-md object-cover ring-1 ring-rule" />
         </a>
       ) : (
-        <div className="size-20 rounded-md bg-sand" />
+        <div className="size-20 rounded-md bg-canvas" />
       )}
       <button
         type="button"
         aria-label={t('mine.removePhoto')}
         onClick={onRemove}
-        className="absolute -top-1.5 -right-1.5 rounded-full bg-shell p-0.5 text-tide shadow-sm hover:text-deep"
+        className="absolute -top-1.5 -right-1.5 rounded-full bg-surface p-0.5 text-muted shadow-sm hover:text-ink"
       >
         <X className="size-3.5" />
       </button>
@@ -67,13 +67,13 @@ function DiffList({ changes }: { changes: Change[] }) {
   const t = useT()
   const { lang } = useLanguage()
   const label = (c: Change) => STRINGS[lang][`param.${c.key}` as StringKey] ?? `${c.section} · ${c.key}`
-  if (!changes.length) return <p className="text-xs text-tide">{t('mine.noChanges')}</p>
+  if (!changes.length) return <p className="text-xs text-muted">{t('mine.noChanges')}</p>
   return (
     <ul className="space-y-0.5 text-xs">
       {changes.map((c) => (
         <li key={`${c.section}.${c.key}`} className="flex flex-wrap gap-x-2">
-          <span className="text-tide">{label(c)}</span>
-          <span className="text-deep tabular-nums">
+          <span className="text-muted">{label(c)}</span>
+          <span className="text-ink tabular-nums">
             {value(c.from, t)} → {value(c.to, t)}
           </span>
         </li>
@@ -94,24 +94,24 @@ function VersionRow({ design, version, onOpen, compare, onCompare }: {
   useEffect(() => setNote(version.note), [version.note])
 
   return (
-    <li className="flex gap-3 rounded-lg bg-sand p-3">
+    <li className="flex gap-3 rounded-lg bg-canvas p-3">
       {version.thumbnail ? (
         <img src={version.thumbnail} alt="" className="h-24 w-20 shrink-0 rounded-md object-cover" />
       ) : (
-        <div className="h-24 w-20 shrink-0 rounded-md bg-foam/60" />
+        <div className="h-24 w-20 shrink-0 rounded-md bg-soft/60" />
       )}
       <div className="min-w-0 flex-1 space-y-2">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <span className="font-medium text-deep">v{version.n}</span>
-          <span className="font-mono text-xs text-lagoon">{designCode(version.config)}</span>
-          <span className="text-xs text-tide">{new Date(version.savedAt).toLocaleString()}</span>
-          <label className="ml-auto flex items-center gap-1 text-xs text-tide">
-            <input type="checkbox" checked={compare} onChange={onCompare} className="accent-lagoon" />
+          <span className="font-medium text-ink">v{version.n}</span>
+          <span className="font-mono text-xs text-gold">{designCode(version.config)}</span>
+          <span className="text-xs text-muted">{new Date(version.savedAt).toLocaleString()}</span>
+          <label className="ml-auto flex items-center gap-1 text-xs text-muted">
+            <input type="checkbox" checked={compare} onChange={onCompare} className="accent-gold" />
             {t('mine.compare')}
           </label>
         </div>
         {version.feedback && (
-          <p className="text-xs text-tide">
+          <p className="text-xs text-muted">
             {fill(t('mine.feedback'), {
               shell: t(`feedback.shell.${version.feedback.shell}`),
               cap: t(`feedback.cap.${version.feedback.cap}`),
@@ -125,13 +125,13 @@ function VersionRow({ design, version, onOpen, compare, onCompare }: {
           placeholder={t('mine.notePlaceholder')}
           onChange={(e) => setNote(e.target.value)}
           onBlur={() => note !== version.note && void library.updateVersion(design.id, version.n, { note })}
-          className="w-full resize-y rounded-md bg-shell px-2 py-1.5 text-sm text-deep ring-1 ring-rule focus:ring-2 focus:ring-lagoon focus:outline-none"
+          className="w-full resize-y rounded-md bg-surface px-2 py-1.5 text-sm text-ink ring-1 ring-rule focus:ring-2 focus:ring-gold focus:outline-none"
         />
         <div className="flex flex-wrap items-center gap-2">
           {version.photos.map((p) => (
             <Photo key={p} id={p} onRemove={() => void library.removePhoto(design.id, version.n, p)} />
           ))}
-          <label className="flex size-20 cursor-pointer flex-col items-center justify-center gap-1 rounded-md border border-dashed border-input text-[0.7rem] text-tide hover:bg-foam/50 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-lagoon">
+          <label className="flex size-20 cursor-pointer flex-col items-center justify-center gap-1 rounded-md border border-dashed border-input text-[0.7rem] text-muted hover:bg-soft/50 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-gold">
             <ImagePlus className="size-4" />
             {t('mine.addPhoto')}
             <input
@@ -171,21 +171,21 @@ function DesignCard({ design }: { design: SavedDesign }) {
   const pair = picked.length === 2 ? picked.map((n) => design.versions.find((v) => v.n === n)!).sort((a, b) => a.n - b.n) : null
 
   return (
-    <li className="rounded-xl bg-shell p-4 shadow-[0_1px_0_var(--rule)]">
+    <li className="rounded-xl bg-surface p-4 shadow-[0_1px_0_var(--rule)]">
       <div className="flex gap-4">
         {latest.thumbnail ? (
           <img src={latest.thumbnail} alt="" className="h-28 w-24 shrink-0 rounded-lg object-cover" />
         ) : (
-          <div className="h-28 w-24 shrink-0 rounded-lg bg-foam/60" />
+          <div className="h-28 w-24 shrink-0 rounded-lg bg-soft/60" />
         )}
         <div className="min-w-0 flex-1">
           <input
             defaultValue={design.name}
             aria-label={t('mine.name')}
             onBlur={(e) => e.target.value !== design.name && void library.rename(design.id, e.target.value)}
-            className="w-full rounded-md bg-transparent font-display text-xl text-deep outline-none focus:bg-sand focus:px-2"
+            className="w-full rounded-md bg-transparent font-display text-xl text-ink outline-none focus:bg-canvas focus:px-2"
           />
-          <p className="mt-1 text-xs text-tide">
+          <p className="mt-1 text-xs text-muted">
             {fill(t('mine.summary'), {
               n: String(design.versions.length),
               shape: t(`sil.${latest.config.shape.silhouette}`),
@@ -212,7 +212,7 @@ function DesignCard({ design }: { design: SavedDesign }) {
               size="sm"
               variant="ghost"
               onClick={() => window.confirm(fill(t('mine.deleteConfirm'), { name: design.name })) && void library.remove(design.id)}
-              className="rounded-full text-coral-ink"
+              className="rounded-full text-warn"
             >
               <Trash2 className="size-3.5" />
               {t('mine.delete')}
@@ -224,12 +224,12 @@ function DesignCard({ design }: { design: SavedDesign }) {
       {expanded && (
         <div className="mt-4 space-y-3">
           {pair && (
-            <div className="rounded-lg bg-foam/50 p-3">
-              <p className="mb-1.5 text-sm font-medium text-deep">{fill(t('mine.changes'), { a: String(pair[0].n), b: String(pair[1].n) })}</p>
+            <div className="rounded-lg bg-soft/50 p-3">
+              <p className="mb-1.5 text-sm font-medium text-ink">{fill(t('mine.changes'), { a: String(pair[0].n), b: String(pair[1].n) })}</p>
               <DiffList changes={diffConfigs(pair[0].config, pair[1].config)} />
             </div>
           )}
-          {picked.length === 1 && <p className="text-xs text-tide">{t('mine.pickAnother')}</p>}
+          {picked.length === 1 && <p className="text-xs text-muted">{t('mine.pickAnother')}</p>}
           <ul className="space-y-2">
             {[...design.versions].reverse().map((v) => (
               <VersionRow
@@ -255,9 +255,9 @@ export function MyDesignsPage() {
   return (
     <section className="mx-auto max-w-4xl px-4 py-12">
       <h1 className="text-3xl font-medium tracking-tight sm:text-4xl">{t('page.myDesigns.title')}</h1>
-      <p className="mt-3 max-w-xl text-tide">{t('mine.lead')}</p>
+      <p className="mt-3 max-w-xl text-muted">{t('mine.lead')}</p>
       {designs.length === 0 ? (
-        <div className="mt-8 rounded-xl border border-dashed border-input bg-shell/70 px-5 py-8 text-sm text-tide">
+        <div className="mt-8 rounded-xl border border-dashed border-input bg-surface/70 px-5 py-8 text-sm text-muted">
           <p>{t('mine.empty')}</p>
           <Button asChild className="mt-4 rounded-full">
             <a href={href('/configure')}>{t('home.start')}</a>

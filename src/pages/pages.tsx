@@ -16,9 +16,9 @@ const EXAMPLES = STYLES.map((style) => ({ style, config: applyStyle(structuredCl
 const FLOW = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => `home.flow.${n}` as StringKey)
 
 const LAYERS = [
-  { key: 'glass', swatch: 'bg-foam border border-dashed border-tide' },
-  { key: 'shell', swatch: 'bg-lagoon' },
-  { key: 'cap', swatch: 'bg-coral' },
+  { key: 'glass', swatch: 'bg-soft border border-dashed border-muted' },
+  { key: 'shell', swatch: 'bg-gold' },
+  { key: 'cap', swatch: 'bg-accent' },
 ] as const
 
 export function HomePage() {
@@ -39,12 +39,12 @@ export function HomePage() {
         <h1 className="mt-4 max-w-3xl text-4xl leading-[1.1] font-medium tracking-tight text-balance sm:text-6xl">
           {t('home.title')}
         </h1>
-        <p className="mt-5 max-w-xl text-lg text-tide">{t('home.lead')}</p>
+        <p className="mt-5 max-w-xl text-lg text-muted">{t('home.lead')}</p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Button asChild size="lg" className="rounded-full px-7">
             <a href={href('/configure')}>{t('home.start')}</a>
           </Button>
-          <Button asChild size="lg" variant="ghost" className="rounded-full px-6 text-deep">
+          <Button asChild size="lg" variant="ghost" className="rounded-full px-6 text-ink">
             <a href={href('/guide')}>{t('home.guide')}</a>
           </Button>
         </div>
@@ -56,11 +56,11 @@ export function HomePage() {
         </h2>
         <ul className="mt-4 grid gap-3 sm:grid-cols-3">
           {LAYERS.map(({ key, swatch }) => (
-            <li key={key} className="flex gap-4 rounded-xl bg-shell p-5 shadow-[0_1px_0_var(--rule)]">
+            <li key={key} className="flex gap-4 rounded-xl bg-surface p-5 shadow-[0_1px_0_var(--rule)]">
               <span className={`mt-1 size-4 shrink-0 rounded-full ${swatch}`} />
               <div>
                 <h3 className="text-lg font-medium">{t(`home.layer.${key}`)}</h3>
-                <p className="mt-1 text-sm text-tide">{t(`home.layer.${key}.text`)}</p>
+                <p className="mt-1 text-sm text-muted">{t(`home.layer.${key}.text`)}</p>
               </div>
             </li>
           ))}
@@ -73,8 +73,8 @@ export function HomePage() {
         </h2>
         <ol className="mt-4 flex flex-wrap gap-2">
           {FLOW.map((key, i) => (
-            <li key={key} className="flex items-center gap-2 rounded-full bg-foam/70 py-1.5 pr-4 pl-1.5 text-sm">
-              <span className="grid size-6 place-items-center rounded-full bg-shell text-xs font-semibold text-lagoon">
+            <li key={key} className="flex items-center gap-2 rounded-full bg-soft/70 py-1.5 pr-4 pl-1.5 text-sm">
+              <span className="grid size-6 place-items-center rounded-full bg-surface text-xs font-semibold text-gold">
                 {i + 1}
               </span>
               {t(key)}
@@ -89,10 +89,10 @@ export function HomePage() {
         </h2>
         <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {SILHOUETTES.map((s) => (
-            <li key={s} className="rounded-xl bg-shell p-4 text-center shadow-[0_1px_0_var(--rule)]">
+            <li key={s} className="rounded-xl bg-surface p-4 text-center shadow-[0_1px_0_var(--rule)]">
               <SilhouetteSketch silhouette={s} />
               <h3 className="mt-3 font-medium">{t(`sil.${s}`)}</h3>
-              <p className="mt-1 text-xs text-tide">{t(`sil.${s}.note`)}</p>
+              <p className="mt-1 text-xs text-muted">{t(`sil.${s}.note`)}</p>
             </li>
           ))}
         </ul>
@@ -102,10 +102,10 @@ export function HomePage() {
         <h2 id="examples" className="kicker">
           {t('home.examples')}
         </h2>
-        <p className="mt-2 max-w-xl text-sm text-tide">{t('home.examples.lead')}</p>
+        <p className="mt-2 max-w-xl text-sm text-muted">{t('home.examples.lead')}</p>
         <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {EXAMPLES.map(({ style, config }) => (
-            <li key={style} className="flex flex-col rounded-xl bg-shell p-4 shadow-[0_1px_0_var(--rule)]">
+            <li key={style} className="flex flex-col rounded-xl bg-surface p-4 shadow-[0_1px_0_var(--rule)]">
               <div className="flex items-center gap-3">
                 <SilhouetteSketch silhouette={config.shape.silhouette} className="h-16 w-auto shrink-0" />
                 <span
@@ -115,7 +115,7 @@ export function HomePage() {
                 />
               </div>
               <h3 className="mt-3 font-medium">{t(`style.${style}`)}</h3>
-              <p className="mt-1 flex-1 text-xs text-tide">{t(`style.${style}.note` as StringKey)}</p>
+              <p className="mt-1 flex-1 text-xs text-muted">{t(`style.${style}.note` as StringKey)}</p>
               <Button size="sm" variant="secondary" onClick={() => startFrom(style)} className="mt-3 rounded-full">
                 {t('home.startFrom')}
               </Button>

@@ -271,11 +271,14 @@ The app uses hash routing so that it works on GitHub Pages.
 
 A header holds the language switch (EN / 中文) and links to all pages.
 
-**Visual style:** ocean / organic nature. Soft blue-greens, sand and off-white,
-flowing curves and gentle motion. The preview shows the bottle in soft light
-with refractive glass and coloured liquid. It must look clearly different from
-the keycap configurator (industrial technical drawing) and the vase
-configurator.
+**Visual style:** perfume boutique / luxury (changed from the first ocean / organic
+direction at the user's request). A warm black showroom with champagne text, warm gold
+for actions and fine rules, and an elegant serif (Cormorant Garamond, bundled; Chinese
+headings use the system Song typeface). The 3D bottle stands on a dark plinth with a gold
+edge, lit like a window display: a warm spot from above, a rim light from behind and long
+strip highlights on glass and metal. Kept distinct from the keycap configurator (light
+technical drawing) and the vase configurator (dark and soft) by the gold-on-black contrast,
+the serif and the gilt rules.
 
 ## 8. Out of scope
 

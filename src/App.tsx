@@ -27,7 +27,7 @@ export default function App() {
   }, [route])
 
   return (
-    <div className="tidewater flex min-h-dvh flex-col">
+    <div className="showroom flex min-h-dvh flex-col">
       <a
         href="#main"
         onClick={(e) => {
@@ -35,7 +35,7 @@ export default function App() {
           e.preventDefault()
           document.getElementById('main')?.focus()
         }}
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-full focus:bg-deep focus:px-4 focus:py-2 focus:text-sand"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-full focus:bg-ink focus:px-4 focus:py-2 focus:text-canvas"
       >
         {t('app.skip')}
       </a>

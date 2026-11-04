@@ -35,12 +35,12 @@ export function SilhouetteSketch({ silhouette, className = 'mx-auto h-28 w-auto'
   return (
     <svg viewBox="0 0 64 100" aria-hidden="true" className={className}>
       {/* Glass bottle and its pump */}
-      <rect x="22" y="34" width="20" height="56" rx="5" fill="var(--foam)" stroke="var(--tide)" strokeDasharray="2 2" />
-      <rect x="28.5" y="24" width="7" height="10" rx="1.5" fill="none" stroke="var(--tide)" />
+      <rect x="22" y="34" width="20" height="56" rx="5" fill="var(--soft)" stroke="var(--muted)" strokeDasharray="2 2" />
+      <rect x="28.5" y="24" width="7" height="10" rx="1.5" fill="none" stroke="var(--muted)" />
       {/* Printed shell */}
       <g
-        fill={open ? 'none' : 'color-mix(in oklab, var(--lagoon) 22%, transparent)'}
-        stroke="var(--deep)"
+        fill={open ? 'none' : 'color-mix(in oklab, var(--gold) 22%, transparent)'}
+        stroke="var(--ink)"
         strokeWidth="1.6"
         strokeLinejoin="round"
         strokeLinecap="round"
@@ -48,7 +48,7 @@ export function SilhouetteSketch({ silhouette, className = 'mx-auto h-28 w-auto'
         {SHELLS[silhouette]}
       </g>
       {/* Printed cap */}
-      <rect x="23" y="8" width="18" height="16" rx="5" fill="var(--coral)" />
+      <rect x="23" y="8" width="18" height="16" rx="5" fill="var(--accent)" />
     </svg>
   )
 }

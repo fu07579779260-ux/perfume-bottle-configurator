@@ -12,7 +12,7 @@ export function LanguageSwitch() {
   const t = useT()
 
   return (
-    <div role="group" aria-label={t('lang.label')} className="flex shrink-0 rounded-full bg-foam/70 p-0.5">
+    <div role="group" aria-label={t('lang.label')} className="flex shrink-0 rounded-full bg-soft/70 p-0.5">
       {OPTIONS.map((o) => (
         <button
           key={o.value}
@@ -22,7 +22,7 @@ export function LanguageSwitch() {
           onClick={() => setLang(o.value)}
           className={cn(
             'min-w-11 rounded-full px-3 py-1 text-xs whitespace-nowrap font-medium transition-colors',
-            lang === o.value ? 'bg-shell text-deep shadow-sm' : 'text-tide hover:text-deep',
+            lang === o.value ? 'bg-surface text-ink shadow-sm' : 'text-muted hover:text-ink',
           )}
         >
           {o.label}

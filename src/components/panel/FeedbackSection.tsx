@@ -21,7 +21,7 @@ function Choice<T extends string>({ label, value, options, onChange }: {
 }) {
   return (
     <div>
-      <p className="text-sm text-deep">{label}</p>
+      <p className="text-sm text-ink">{label}</p>
       <div role="radiogroup" aria-label={label} className="mt-1.5 grid grid-cols-3 gap-1.5">
         {options.map((o) => (
           <button
@@ -32,7 +32,7 @@ function Choice<T extends string>({ label, value, options, onChange }: {
             onClick={() => onChange(o.value)}
             className={cn(
               'rounded-lg px-2 py-1.5 text-xs transition-colors',
-              value === o.value ? 'bg-deep text-sand' : 'bg-foam/70 text-deep hover:bg-foam',
+              value === o.value ? 'bg-gold text-canvas' : 'bg-soft/70 text-ink hover:bg-soft',
             )}
           >
             {o.label}
@@ -84,7 +84,7 @@ export function FeedbackSection() {
   return (
     <div className="space-y-3">
       <h2 className="kicker">{t('panel.feedback')}</h2>
-      <p className="text-xs text-tide">{t('feedback.intro')}</p>
+      <p className="text-xs text-muted">{t('feedback.intro')}</p>
       <Choice
         label={t('feedback.shell')}
         value={feedback.shell}
@@ -103,13 +103,13 @@ export function FeedbackSection() {
       <div role="status" className="space-y-1 text-xs">
         {result && (
           <>
-            <p className="text-deep">{describe(result) || t('feedback.noChange')}</p>
+            <p className="text-ink">{describe(result) || t('feedback.noChange')}</p>
             {result.tips.map((tip) => (
-              <p key={tip} className="text-coral-ink">
+              <p key={tip} className="text-warn">
                 {t(`feedback.tip.${tip}`)}
               </p>
             ))}
-            <p className="text-tide">
+            <p className="text-muted">
               {result.savedAs ? fill(t('feedback.savedAs'), { n: String(result.savedAs) }) : t('feedback.saveHint')}
             </p>
           </>

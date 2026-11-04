@@ -15,7 +15,7 @@ function Pills<T extends string>({ label, value, options, onChange }: {
 }) {
   return (
     <div>
-      <p className="text-sm text-deep">{label}</p>
+      <p className="text-sm text-ink">{label}</p>
       <div role="group" aria-label={label} className="mt-1.5 flex flex-wrap gap-1.5">
         {options.map((o) => (
           <button
@@ -25,7 +25,7 @@ function Pills<T extends string>({ label, value, options, onChange }: {
             onClick={() => onChange(o.value)}
             className={cn(
               'rounded-full px-3.5 py-1 text-sm transition-colors',
-              value === o.value ? 'bg-deep text-sand' : 'bg-foam/70 text-deep hover:bg-foam',
+              value === o.value ? 'bg-gold text-canvas' : 'bg-soft/70 text-ink hover:bg-soft',
             )}
           >
             {o.label}
@@ -67,7 +67,7 @@ export function CapSection() {
         onChange={(height) => patch('cap', { height })}
       />
       {layout.raised && (
-        <p role="status" className="text-xs text-coral-ink">
+        <p role="status" className="text-xs text-warn">
           {t('cap.raised')} ({(layout.topY - layout.baseY).toFixed(1)} mm)
         </p>
       )}
@@ -85,9 +85,9 @@ export function CapSection() {
         options={CAP_FITS.map((v) => ({ value: v, label: t(`cap.fit.${v}`) }))}
         onChange={(fit) => patch('cap', { fit })}
       />
-      <p className="text-xs text-tide">{t(`cap.fit.${cap.fit}.note`)}</p>
+      <p className="text-xs text-muted">{t(`cap.fit.${cap.fit}.note`)}</p>
       {magnets && !magnets.fits && (
-        <p role="status" className="text-xs font-medium text-coral-ink">
+        <p role="status" className="text-xs font-medium text-warn">
           {t('cap.magnetNoRoom')}
         </p>
       )}

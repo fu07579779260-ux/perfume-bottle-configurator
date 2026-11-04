@@ -21,8 +21,8 @@ export function SilhouettePicker() {
             <label
               key={s}
               className={cn(
-                'relative flex cursor-pointer flex-col items-center rounded-lg px-1 pt-2 pb-1.5 text-center transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-lagoon',
-                current === s ? 'bg-foam ring-2 ring-deep' : 'bg-sand hover:bg-foam/60',
+                'relative flex cursor-pointer flex-col items-center rounded-lg px-1 pt-2 pb-1.5 text-center transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-gold',
+                current === s ? 'bg-soft ring-2 ring-ink' : 'bg-canvas hover:bg-soft/60',
                 !ready && 'cursor-not-allowed opacity-50',
               )}
             >
@@ -36,13 +36,13 @@ export function SilhouettePicker() {
                 className="sr-only"
               />
               <SilhouetteSketch silhouette={s} className="h-14 w-auto" />
-              <span className="mt-1 text-xs leading-tight text-deep">{t(`sil.${s}`)}</span>
-              {!ready && <span className="text-[0.6rem] text-tide">{t('panel.later')}</span>}
+              <span className="mt-1 text-xs leading-tight text-ink">{t(`sil.${s}`)}</span>
+              {!ready && <span className="text-[0.6rem] text-muted">{t('panel.later')}</span>}
             </label>
           )
         })}
       </div>
-      <p className="mt-2 text-xs text-tide">{t(`sil.${current}.note`)}</p>
+      <p className="mt-2 text-xs text-muted">{t(`sil.${current}.note`)}</p>
     </fieldset>
   )
 }

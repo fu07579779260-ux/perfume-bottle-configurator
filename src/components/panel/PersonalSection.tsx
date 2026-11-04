@@ -24,7 +24,7 @@ function Pills<T extends string>({ label, value, options, onChange }: {
 }) {
   return (
     <div>
-      <p className="text-sm text-deep">{label}</p>
+      <p className="text-sm text-ink">{label}</p>
       <div role="group" aria-label={label} className="mt-1.5 flex flex-wrap gap-1.5">
         {options.map((o) => (
           <button
@@ -34,7 +34,7 @@ function Pills<T extends string>({ label, value, options, onChange }: {
             onClick={() => onChange(o.value)}
             className={cn(
               'rounded-full px-3 py-1 text-xs transition-colors',
-              value === o.value ? 'bg-deep text-sand' : 'bg-foam/70 text-deep hover:bg-foam',
+              value === o.value ? 'bg-gold text-canvas' : 'bg-soft/70 text-ink hover:bg-soft',
             )}
           >
             {o.label}
@@ -54,7 +54,7 @@ function ColourPicker({ label, value, colours, onChange }: {
   const t = useT()
   return (
     <div>
-      <p className="text-sm text-deep">{label}</p>
+      <p className="text-sm text-ink">{label}</p>
       <div role="group" aria-label={label} className="mt-1.5 flex flex-wrap items-center gap-1.5">
         {colours.map((c) => (
           <button
@@ -64,7 +64,7 @@ function ColourPicker({ label, value, colours, onChange }: {
             aria-pressed={value === c}
             onClick={() => onChange(c)}
             style={{ backgroundColor: c }}
-            className={cn('size-7 rounded-full ring-offset-2 ring-offset-shell', value === c ? 'ring-2 ring-deep' : 'ring-1 ring-rule')}
+            className={cn('size-7 rounded-full ring-offset-2 ring-offset-surface', value === c ? 'ring-2 ring-ink' : 'ring-1 ring-rule')}
           />
         ))}
         <label className="relative size-7 cursor-pointer overflow-hidden rounded-full ring-1 ring-rule" title={t('personal.custom')}>
@@ -110,24 +110,24 @@ export function PersonalSection() {
       <h2 className="kicker">{t('panel.personal')}</h2>
 
       <div>
-        <p className="text-sm text-deep">{t('personal.style')}</p>
+        <p className="text-sm text-ink">{t('personal.style')}</p>
         <div className="mt-1.5 flex flex-wrap gap-1.5">
           {STYLES.map((s) => (
             <button
               key={s}
               type="button"
               onClick={() => load(applyStyle(config, s))}
-              className="rounded-full bg-sand px-3 py-1 text-xs text-deep ring-1 ring-rule hover:bg-foam"
+              className="rounded-full bg-canvas px-3 py-1 text-xs text-ink ring-1 ring-rule hover:bg-soft"
             >
               {t(`style.${s}`)}
             </button>
           ))}
         </div>
-        <p className="mt-1 text-xs text-tide">{t('personal.styleNote')}</p>
+        <p className="mt-1 text-xs text-muted">{t('personal.styleNote')}</p>
       </div>
 
       <div className="space-y-2">
-        <label htmlFor={textId} className="block text-sm text-deep">
+        <label htmlFor={textId} className="block text-sm text-ink">
           {t('personal.text')}
         </label>
         <textarea
@@ -136,9 +136,9 @@ export function PersonalSection() {
           value={p.text}
           placeholder={t('personal.textPlaceholder')}
           onChange={(e) => patch('personal', { text: e.target.value })}
-          className="w-full resize-none rounded-lg bg-sand px-3 py-2 text-sm text-deep ring-1 ring-rule focus:ring-2 focus:ring-lagoon focus:outline-none"
+          className="w-full resize-none rounded-lg bg-canvas px-3 py-2 text-sm text-ink ring-1 ring-rule focus:ring-2 focus:ring-gold focus:outline-none"
         />
-        <p className="text-xs text-tide">{fill(t('personal.textLimits'), { n: String(MAX_TEXT_LINE_LENGTH) })}</p>
+        <p className="text-xs text-muted">{fill(t('personal.textLimits'), { n: String(MAX_TEXT_LINE_LENGTH) })}</p>
         {p.text.trim() && (
           <>
             <Pills
@@ -155,19 +155,19 @@ export function PersonalSection() {
             />
             <ParamSlider label={t('param.textSize')} value={p.textSize} range={RANGES.personal.textSize} onChange={(textSize) => patch('personal', { textSize })} />
             <ParamSlider label={t('param.textDepth')} value={p.textDepth} range={RANGES.personal.textDepth} onChange={(textDepth) => patch('personal', { textDepth })} />
-            {config.manufacturing.technology === 'fdm' && p.textSize < 5 && <p className="text-xs text-coral-ink">{t('personal.smallText')}</p>}
-            {p.textPosition === 'base' && <p className="text-xs text-tide">{t('personal.baseEngraved')}</p>}
-            <p className="text-xs text-tide">{t('personal.fontsNote')}</p>
+            {config.manufacturing.technology === 'fdm' && p.textSize < 5 && <p className="text-xs text-warn">{t('personal.smallText')}</p>}
+            {p.textPosition === 'base' && <p className="text-xs text-muted">{t('personal.baseEngraved')}</p>}
+            <p className="text-xs text-muted">{t('personal.fontsNote')}</p>
           </>
         )}
       </div>
 
       <div className="space-y-2">
-        <p className="text-sm text-deep">{t('personal.logo')}</p>
+        <p className="text-sm text-ink">{t('personal.logo')}</p>
         <div className="flex items-center gap-2">
           <label
             htmlFor={fileId}
-            className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-foam/70 px-3 py-1.5 text-sm text-deep hover:bg-foam has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-lagoon"
+            className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-soft/70 px-3 py-1.5 text-sm text-ink hover:bg-soft has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-gold"
           >
             <Upload aria-hidden="true" className="size-4" />
             {busy ? t('logo.reading') : p.logoName && !missingLogo ? t('logo.replace') : t('logo.choose')}
@@ -191,19 +191,19 @@ export function PersonalSection() {
                 logoStore.set(null)
                 patch('personal', { logoName: null })
               }}
-              className="rounded-full p-1.5 text-tide hover:bg-foam hover:text-deep"
+              className="rounded-full p-1.5 text-muted hover:bg-soft hover:text-ink"
             >
               <X className="size-4" />
             </button>
           )}
         </div>
-        <p role="status" className="text-xs text-tide">
+        <p role="status" className="text-xs text-muted">
           {problem ? (
-            <span className="text-coral-ink">{problem}</span>
+            <span className="text-warn">{problem}</span>
           ) : missingLogo ? (
-            <span className="text-coral-ink">{fill(t('logo.missing'), { name: p.logoName ?? '' })}</span>
+            <span className="text-warn">{fill(t('logo.missing'), { name: p.logoName ?? '' })}</span>
           ) : p.logoName ? (
-            <span className="break-all text-deep">{p.logoName}</span>
+            <span className="break-all text-ink">{p.logoName}</span>
           ) : (
             t('logo.hint')
           )}
@@ -226,11 +226,11 @@ export function PersonalSection() {
           type="checkbox"
           checked={p.designNumber}
           onChange={(e) => patch('personal', { designNumber: e.target.checked })}
-          className="mt-0.5 size-4 accent-lagoon"
+          className="mt-0.5 size-4 accent-gold"
         />
         <span>
-          <span className="block text-sm text-deep">{t('personal.number')}</span>
-          <span className="block text-xs text-tide">
+          <span className="block text-sm text-ink">{t('personal.number')}</span>
+          <span className="block text-xs text-muted">
             {fill(t('personal.numberNote'), { code: designCode(config) })}
           </span>
         </span>
