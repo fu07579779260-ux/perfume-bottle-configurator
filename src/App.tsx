@@ -8,8 +8,8 @@ import {
   GuidePage,
   HomePage,
   InspirationPage,
-  MyDesignsPage,
 } from '@/pages/pages'
+import { MyDesignsPage } from '@/pages/MyDesignsPage'
 
 const PAGES: Record<Route, ComponentType> = {
   '/': HomePage,

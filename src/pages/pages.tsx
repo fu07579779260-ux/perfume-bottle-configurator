@@ -96,7 +96,3 @@ export function GuidePage() {
   return <PagePlaceholder title={t('page.guide.title')} summary={t('page.guide.summary')} />
 }
 
-export function MyDesignsPage() {
-  const t = useT()
-  return <PagePlaceholder title={t('page.myDesigns.title')} summary={t('page.myDesigns.summary')} />
-}

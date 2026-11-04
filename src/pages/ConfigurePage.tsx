@@ -7,6 +7,7 @@ import { FitTestSection } from '@/components/panel/FitTestSection'
 import { PersonalSection } from '@/components/panel/PersonalSection'
 import { ProfileEditor } from '@/components/panel/ProfileEditor'
 import { PrintSection } from '@/components/panel/PrintSection'
+import { ShareSection } from '@/components/panel/ShareSection'
 import { SilhouettePicker } from '@/components/panel/SilhouettePicker'
 import { TextureSection } from '@/components/panel/TextureSection'
 import { ViewportErrorBoundary } from '@/components/viewport/ViewportErrorBoundary'
@@ -134,7 +135,8 @@ function BottlePanel() {
 
       <ExportSection />
 
-      <p className="rounded-lg bg-foam/50 p-3 text-xs text-tide">{t('panel.pending')}</p>
+      <ShareSection />
+
     </div>
   )
 }
