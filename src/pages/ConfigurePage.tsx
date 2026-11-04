@@ -166,7 +166,8 @@ export function ConfigurePage() {
         </ViewportErrorBoundary>
       </section>
 
-      <aside aria-label={t('panel.label')} className="rounded-xl bg-surface shadow-[0_1px_0_var(--rule)] lg:order-1 lg:w-80 lg:overflow-y-auto">
+      {/* relative: keeps the visually hidden inputs (radios, file pickers) inside the scroll area instead of stretching the page */}
+      <aside aria-label={t('panel.label')} className="relative rounded-xl bg-surface shadow-[0_1px_0_var(--rule)] lg:order-1 lg:w-80 lg:overflow-y-auto">
         <BottlePanel />
       </aside>
     </div>
