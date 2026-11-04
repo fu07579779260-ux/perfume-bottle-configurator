@@ -5,7 +5,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { layoutParts, partForPrint, printParts } from '@/geometry/parts'
 import { DEFAULT_CONFIG, type DesignConfig } from '@/model/config'
 import { designReducer } from '@/model/reducer'
-import { glassReference, RHINO_FILE_VERSION, write3dm } from './rhino'
+import { glassReference, RHINO_FILE_VERSION, write3dm, type RhinoPart } from './rhino'
 import { designSummary } from './summary'
 import { threeMfModel, write3mf } from './threemf'
 
@@ -64,14 +64,14 @@ describe('per-part STL', () => {
 describe('3DM', () => {
   it('opens in Rhino with one named layer per part and the glass bottle', () => {
     const c = design({ assembly: { method: 'bottom' } })
-    const parts = printParts(wasm, c, 24).map((p) => ({ name: p.id, colour: '#e6d8bf', mesh: p.mesh }))
+    const parts: RhinoPart[] = printParts(wasm, c, 24).map((p) => ({ name: p.id, colour: '#e6d8bf', mesh: p.mesh }))
     parts.push({ name: 'Glass', colour: '#cfe3df', mesh: glassReference(c.bottle) })
     const doc = rhino.File3dm.fromByteArray(write3dm(rhino, parts, 'Test'))
     expect(doc.objects().count).toBe(parts.length)
     expect(doc.layers().count).toBe(parts.length)
     expect(doc.layers().get(0).name).toBe('shell')
     expect(RHINO_FILE_VERSION).toBe(7)
-    doc.delete()
+    ;(doc as unknown as { delete(): void }).delete()
   })
 })
 
