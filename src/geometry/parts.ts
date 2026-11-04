@@ -294,20 +294,27 @@ const PRINT_TURN: Record<PartId, number> = {
   cap: 0,
 }
 
-/** All parts in one mesh, each turned into its print orientation and spaced out on the bed. */
-export function layoutForPrint(parts: Part[]): MeshData {
+/** Each part turned into its print orientation and spaced out on the bed (scene axes, Y up). */
+export function layoutParts(parts: Part[]): Part[] {
   const placed = parts.map((part) => {
     const turned = rotateX(part.mesh, PRINT_TURN[part.id])
-    const b = meshBounds(turned)
-    return { mesh: turned, b }
+    return { id: part.id, mesh: turned, b: meshBounds(turned) }
   })
   const total = placed.reduce((w, { b }) => w + b.width, 0) + BED_GAP * (placed.length - 1)
   let x = -total / 2
-  return mergeMeshes(
-    placed.map(({ mesh, b }) => {
-      const moved = translate(mesh, x - b.min[0], -b.min[1], -(b.min[2] + b.max[2]) / 2)
-      x += b.width + BED_GAP
-      return moved
-    }),
-  )
+  return placed.map(({ id, mesh, b }) => {
+    const moved = translate(mesh, x - b.min[0], -b.min[1], -(b.min[2] + b.max[2]) / 2)
+    x += b.width + BED_GAP
+    return { id, mesh: moved }
+  })
+}
+
+/** All parts in one mesh, laid out on the bed. */
+export function layoutForPrint(parts: Part[]): MeshData {
+  return mergeMeshes(layoutParts(parts).map((p) => p.mesh))
+}
+
+/** One part on its own, turned into print orientation and standing on the bed at the origin. */
+export function partForPrint(part: Part): MeshData {
+  return layoutParts([part])[0].mesh
 }

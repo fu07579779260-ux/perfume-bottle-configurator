@@ -7,6 +7,7 @@ import { checkOverhang, checkWall, shellLayout, shellSize } from '@/geometry/she
 import { fill, useT } from '@/i18n/language'
 import { cn } from '@/lib/utils'
 import { useDesign } from '@/model/design-context'
+import { CaptureRegistrar } from './CaptureRegistrar'
 import { GlassBottle } from './GlassBottle'
 import { Shell } from './Shell'
 import { useShellParts } from './use-shell-parts'
@@ -114,6 +115,7 @@ export default function Viewport() {
         />
 
         <CameraHome homeKey={homeKey} distance={distance} targetY={targetY} />
+        <CaptureRegistrar />
         <OrbitControls
           key={homeKey}
           makeDefault

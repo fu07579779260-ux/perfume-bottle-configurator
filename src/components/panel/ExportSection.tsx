@@ -2,25 +2,24 @@ import { Download } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { downloadFile } from '@/export/download'
-import { shellFileName } from '@/export/file-names'
-import { toBinaryStl } from '@/export/stl'
-import { loadManifold } from '@/geometry/manifold-loader'
-import { capMagnetPlan, jointInfo, layoutForPrint, printParts } from '@/geometry/parts'
+import { exportDesign, type ExportFormat } from '@/export/exporters'
+import { capMagnetPlan, jointInfo } from '@/geometry/parts'
 import { checkWall } from '@/geometry/shell'
-import { fill, useT } from '@/i18n/language'
+import { fill, useLanguage, useT } from '@/i18n/language'
 import type { StringKey } from '@/i18n/strings'
 import { useDesign } from '@/model/design-context'
 import { useMarks } from '@/personal/use-marks'
 
-/** Higher resolution than the preview, so curves print smoothly */
-const EXPORT_SEGMENTS = 192
+/** The other formats, after the main STL button */
+const MORE: ExportFormat[] = ['3mf', 'zip', '3dm', 'pdf', 'png']
 
 export function ExportSection() {
   const t = useT()
+  const { lang } = useLanguage()
   const { config } = useDesign()
-  const [last, setLast] = useState<{ name: string; triangles: number; kb: number } | null>(null)
   const marks = useMarks(config)
-  const [busy, setBusy] = useState(false)
+  const [busy, setBusy] = useState<ExportFormat | null>(null)
+  const [last, setLast] = useState<{ name: string; kb: number } | null>(null)
   const [failed, setFailed] = useState(false)
   const wall = checkWall(config)
   const joint = jointInfo(config)
@@ -28,22 +27,19 @@ export function ExportSection() {
   const tech = config.manufacturing.technology
   const method = config.assembly.method
 
-  const exportStl = async () => {
-    setBusy(true)
+  const run = async (format: ExportFormat) => {
+    setBusy(format)
     setFailed(false)
     try {
-      // The geometry kernel cuts the halves, holes and slots
-      const wasm = await loadManifold()
-      const mesh = layoutForPrint(printParts(wasm, config, EXPORT_SEGMENTS, marks))
-      const name = shellFileName(config)
-      const stl = toBinaryStl(mesh, `Perfume bottle shell - ${name}`)
-      downloadFile(stl, name, 'model/stl')
-      setLast({ name, triangles: mesh.indices.length / 3, kb: Math.round(stl.byteLength / 1024) })
+      const file = await exportDesign(format, config, marks, lang)
+      downloadFile(file.data, file.name, file.type)
+      const size = file.data instanceof Blob ? file.data.size : (file.data as ArrayBuffer | Uint8Array).byteLength
+      setLast({ name: file.name, kb: Math.round(size / 1024) })
     } catch (error) {
       console.error('Export failed', error)
       setFailed(true)
     } finally {
-      setBusy(false)
+      setBusy(null)
     }
   }
 
@@ -65,10 +61,24 @@ export function ExportSection() {
           <> {fill(t('export.capMagnets'), { d: String(config.assembly.magnetDiameter), h: String(config.assembly.magnetHeight) })}</>
         )}
       </p>
-      <Button onClick={() => void exportStl()} disabled={busy} className="w-full rounded-full">
+      <Button onClick={() => void run('stl')} disabled={busy !== null} className="w-full rounded-full">
         <Download aria-hidden="true" />
-        {busy ? t('export.building') : t('export.stl')}
+        {busy === 'stl' ? t('export.building') : t('export.stl')}
       </Button>
+      <div className="grid grid-cols-2 gap-1.5">
+        {MORE.map((f) => (
+          <button
+            key={f}
+            type="button"
+            disabled={busy !== null}
+            onClick={() => void run(f)}
+            className="rounded-lg bg-foam/70 px-2.5 py-1.5 text-left text-xs text-deep hover:bg-foam disabled:opacity-50"
+          >
+            <span className="block font-medium">{busy === f ? t('export.building') : t(`export.format.${f}` as StringKey)}</span>
+            <span className="block text-[0.7rem] text-tide">{t(`export.format.${f}.note` as StringKey)}</span>
+          </button>
+        ))}
+      </div>
 
       <div role="status" className="space-y-1 text-xs">
         {failed && <p className="font-medium text-coral-ink">{t('export.failed')}</p>}
@@ -76,8 +86,7 @@ export function ExportSection() {
         {!wall.ok && <p className="font-medium text-coral-ink">{t('export.thinWarning')}</p>}
         {last && (
           <p className="text-tide">
-            <span className="break-all text-deep">{last.name}</span> ·{' '}
-            {fill(t('export.saved'), { triangles: last.triangles.toLocaleString(), kb: String(last.kb) })}
+            <span className="break-all text-deep">{last.name}</span> · {last.kb} KB
           </p>
         )}
       </div>
